@@ -1,0 +1,21 @@
+{
+    "name": "Antypodish.GeneticNeuralNetworkCore",
+    "references": [
+        "GUID:0884234c701d36547a19f63da1bff495",
+        "GUID:8a2eafa29b15f444eb6d74f94a930e1d",
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:734d92eba21c94caba915361bd5ac177",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:63afb046c8423dd448ae7aba042ea63d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
