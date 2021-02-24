@@ -65,14 +65,14 @@ namespace Antypodish.Hove.DOTS
 
                 ComponentType.ReadOnly <PathNodeTag> ()
             ) ;
-
+            
+            nhm_entityIndex     = default ;
+            
+            isSystemInitialized = false ;
         }
 
         protected override void OnStartRunning ( )
         {
-            nhm_entityIndex     = default ;
-            
-            isSystemInitialized = false ;
         }
 
         protected override void OnDestroy ( )
@@ -82,7 +82,6 @@ namespace Antypodish.Hove.DOTS
 
         protected override void OnUpdate ( )
         {
-            
             
             if ( !isSystemInitialized )
             {
@@ -126,12 +125,13 @@ namespace Antypodish.Hove.DOTS
 
             Entities
                 .WithName ( "PathSearchedJob" )
-                .WithAll <IsAliveTag, PathPlannerComponent> ()
+                .WithAll <IsAliveTag, PathPlannerComponent, CanFindPathTag> ()
                 .ForEach ( ( Entity entity, int entityInQueryIndex ) => 
             { 
                 ecbp.RemoveComponent <CanFindPathTag> ( entityInQueryIndex, entity ) ;
             }).Schedule () ;
 
+            eecb.AddJobHandleForProducer ( Dependency ) ;
 
         }
 

@@ -17,6 +17,7 @@ namespace Antypodish.Hove.DOTS
 
     [AlwaysUpdateSystem]
     [UpdateAfter ( typeof ( FixedStepSimulationSystemGroup ))]
+    [UpdateBefore ( typeof ( PathFindingSystem ) )]
     public class OrderNewPathSystem : SystemBase
     {
         
@@ -55,12 +56,21 @@ namespace Antypodish.Hove.DOTS
 
                 ComponentType.ReadWrite <PathPlannerComponent> ()
             ) ;
+            
+            EntityArchetype entityArchetype = EntityManager.CreateArchetype
+            (
+                typeof ( IsAliveTag ),
+                typeof ( PathPlannerComponent ),
+                typeof ( PathNodesBuffer )
+            ) ;
+
+// Test 
+EntityManager.CreateEntity ( entityArchetype, 100 ) ;
 
         }
 
         protected override void OnStartRunning ( )
         {
-            EntityManager.CreateEntity ( typeof ( PathPlannerComponent ), typeof ( PathNodesBuffer ), typeof ( IsAliveTag ) ) ;
         }
 
         protected override void OnDestroy ( )
@@ -77,9 +87,6 @@ namespace Antypodish.Hove.DOTS
             
             CollisionWorld collisionWorld        = buildPhysicsWorld.PhysicsWorld.CollisionWorld ;
 
-            NativeArray <Entity> na_pathPlanners = group_pathPlanners.ToEntityArray ( Allocator.TempJob ) ;
-            Entity pathPlannersEntity            = na_pathPlanners [0] ;
-            na_pathPlanners.Dispose () ;
 
 
             float3 f_pointerPosition             = Input.mousePosition ;
@@ -113,22 +120,39 @@ Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 1
                 {
                     
                     ComponentDataFromEntity <PathPlannerComponent> a_pathPlanners = GetComponentDataFromEntity <PathPlannerComponent> ( false ) ;
-                    PathPlannerComponent pathPlanner                              = a_pathPlanners [pathPlannersEntity] ;
                     
-
-                    if (  Input.GetMouseButtonUp ( 0 ) )
+                    NativeArray <Entity> na_pathPlanners = group_pathPlanners.ToEntityArray ( Allocator.TempJob ) ;
+                    
+                    Entity pathPlannersEntity ;
+                    PathPlannerComponent pathPlanner ; ;
+                    
+                    // Test.
+                    for ( int i = 0; i < na_pathPlanners.Length; i ++ )
                     {
-                        // A
-                        pathPlanner.entityA = collector.ClosestHit.Entity ;
 
-                    }
-                    else if ( Input.GetMouseButtonUp ( 1 ) )
-                    {
-                        // B
-                        pathPlanner.entityB = collector.ClosestHit.Entity ;
-                    }
+                        pathPlannersEntity = na_pathPlanners [i] ;
+                        pathPlanner        = a_pathPlanners [pathPlannersEntity] ;
 
-                    a_pathPlanners [pathPlannersEntity] = pathPlanner ;
+                        if (  Input.GetMouseButtonUp ( 0 ) )
+                        {
+                            // A
+                            pathPlanner.entityA = collector.ClosestHit.Entity ;
+
+                        }
+                        else if ( Input.GetMouseButtonUp ( 1 ) )
+                        {
+                            // B
+                            pathPlanner.entityB = collector.ClosestHit.Entity ;
+                        }
+
+                        a_pathPlanners [pathPlannersEntity] = pathPlanner ; // Set back
+                        
+                    } // for
+                    
+                    pathPlannersEntity = na_pathPlanners [0] ;
+                    pathPlanner        = a_pathPlanners [pathPlannersEntity] ;
+
+                    na_pathPlanners.Dispose () ;
 
                     if ( pathPlanner.entityA.Version > 0 && pathPlanner.entityB.Version > 0 )
                     {
@@ -145,6 +169,7 @@ Debug.Log ( "Start entity: " + pathPlanner.entityA + " target entity: " + pathPl
                             ecbp.AddComponent <CanFindPathTag> ( entityInQueryIndex, entity ) ;
                         }).Schedule () ;
 
+                        becb.AddJobHandleForProducer ( Dependency ) ;
                     }
 
                 }
