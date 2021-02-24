@@ -12,7 +12,7 @@ using Unity.Mathematics ;
 using Antypodish.DOTS ;
 
 
-namespace Antypodish.Hove.DOTS
+namespace Antypodish.NodePathFinding.DOTS
 {
 
     
@@ -196,10 +196,6 @@ namespace Antypodish.Hove.DOTS
             // Path finding will alternate between last visited buffer, to find next linked nodes.
             NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
             NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-            
-
-            // Reset lats visited.
-            // a_lastVisitedPathNodes.ResizeUninitialized ( 0 ) ;
 
             // Set initial infinity max distances for nodes.
             // If final results of nodes will stay infity, that means is unreachable.
@@ -276,7 +272,7 @@ namespace Antypodish.Hove.DOTS
 
                     float3 f3_currentPosition  = a_pathNodesPosition [currentNodeEnity].Value ;
                     f3_previousPosition        = a_pathNodesPosition [previousNodeEnity].Value ;
-Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.red, 7 ) ;
+// Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.red, 7 ) ;
                     
                     a_pathNodes.Add ( new PathNodesBuffer () { f3_position = f3_currentPosition } ) ;
 
@@ -326,7 +322,7 @@ float3 f3_currentNodePos = a_posDebug [lastVisitedPathNodes.entity].Value ;
  
 float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
 
-Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.white, 2 ) ;  
+// Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.white, 2 ) ;  
                     
                     float f_weight2NextNode = f_weight2ThisNode + f_nextNodeDistance ;
 

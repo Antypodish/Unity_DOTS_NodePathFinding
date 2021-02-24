@@ -1,11 +1,9 @@
 ﻿using Unity.Jobs ;
-using Unity.Burst ;
 using Unity.Entities ;
 
 
-namespace Antypodish.Hove.DOTS
+namespace Antypodish.NodePathFinding.DOTS
 {
-
     public class InitializePathsNetSystem : SystemBase
     {
 

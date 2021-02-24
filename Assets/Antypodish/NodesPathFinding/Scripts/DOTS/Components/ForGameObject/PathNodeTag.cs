@@ -2,7 +2,7 @@
 
 using Unity.Entities;
 
-namespace Antypodish.Hove.DOTS
+namespace Antypodish.NodePathFinding.DOTS
 {
 
     [GenerateAuthoringComponent]

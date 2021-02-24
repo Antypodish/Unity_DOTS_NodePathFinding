@@ -2,7 +2,6 @@
 
 using Unity.Physics ;
 using Unity.Physics.Systems ;
-using Unity.Physics.Extensions ;
 
 using Unity.Jobs ;
 using Unity.Burst ;
@@ -14,7 +13,7 @@ using Unity.Mathematics ;
 using Antypodish.DOTS ;
 
 
-namespace Antypodish.Hove.DOTS
+namespace Antypodish.NodePathFinding.DOTS
 {
 
     

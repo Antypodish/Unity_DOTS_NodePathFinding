@@ -11,8 +11,9 @@ using Unity.Mathematics ;
 
 using Antypodish.DOTS ;
 
+using Antypodish.NodePathFinding.DOTS ;
 
-namespace Antypodish.Hove.DOTS
+namespace Antypodish.NodePathFindingExample.DOTS
 {
 
     [AlwaysUpdateSystem]
@@ -61,11 +62,20 @@ namespace Antypodish.Hove.DOTS
             (
                 typeof ( IsAliveTag ),
                 typeof ( PathPlannerComponent ),
-                typeof ( PathNodesBuffer )
+                typeof ( PathNodesBuffer ),
+                
+                typeof ( Prefab )
             ) ;
 
-// Test 
-EntityManager.CreateEntity ( entityArchetype, 100 ) ;
+            // Example 
+            {
+                Entity pathPlannerPrefabEntity = EntityManager.CreateEntity ( entityArchetype ) ;
+                EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannar" ) ;
+                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 10000, Allocator.Temp ) ;
+                na_pathPLannerEntities.Dispose () ;
+            
+                EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannarPrefab" ) ;
+            }
 
         }
 

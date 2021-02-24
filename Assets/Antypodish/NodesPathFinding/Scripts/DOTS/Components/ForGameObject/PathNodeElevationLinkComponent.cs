@@ -3,7 +3,7 @@
 using Unity.Entities;
 using Unity.Transforms ;
 
-namespace Antypodish.Hove.DOTS
+namespace Antypodish.NodePathFinding.DOTS
 {
 
     [GenerateAuthoringComponent]

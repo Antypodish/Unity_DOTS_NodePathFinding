@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics ;
 
-namespace Antypodish.Hove.DOTS
+namespace Antypodish.NodePathFinding.DOTS
 {
 
     public struct PathNodeElevationComponent : IComponentData 
