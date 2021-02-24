@@ -61,7 +61,7 @@ namespace Antypodish.Hove.DOTS
             (
                 ComponentType.ReadOnly <IsAliveTag> (),
 
-                ComponentType.ReadWrite <PathPlannerComponents> ()
+                ComponentType.ReadWrite <PathPlannerComponent> ()
             ) ;
             
             group_netNodes = EntityManager.CreateEntityQuery 
@@ -77,7 +77,7 @@ namespace Antypodish.Hove.DOTS
 
         protected override void OnStartRunning ( )
         {
-            EntityManager.CreateEntity ( typeof ( PathPlannerComponents ), typeof ( IsAliveTag ) ) ;
+            EntityManager.CreateEntity ( typeof ( PathPlannerComponent ), typeof ( PathNodesBuffer ), typeof ( IsAliveTag ) ) ;
 
             nhm_entityIndex = default ;
         }
@@ -94,16 +94,15 @@ namespace Antypodish.Hove.DOTS
             
             if ( i_pathPlannerCount == 0 ) return ;
             
-            CollisionWorld collisionWorld = buildPhysicsWorld.PhysicsWorld.CollisionWorld ;
+            CollisionWorld collisionWorld        = buildPhysicsWorld.PhysicsWorld.CollisionWorld ;
 
-            NativeArray <Entity> na_entities = group_pathPlanner.ToEntityArray ( Allocator.Temp ) ;
-            Entity entity                    = na_entities [0] ;
-            na_entities.Dispose () ;
+            NativeArray <Entity> na_pathPlanners = group_pathPlanner.ToEntityArray ( Allocator.TempJob ) ;
+            Entity entity                        = na_pathPlanners [0] ;
+            na_pathPlanners.Dispose () ;
 
 
-
-            float3 f_pointerPosition   = Input.mousePosition ;
-            UnityEngine.Ray pointerRay = Camera.main.ScreenPointToRay ( f_pointerPosition ) ;
+            float3 f_pointerPosition             = Input.mousePosition ;
+            UnityEngine.Ray pointerRay           = Camera.main.ScreenPointToRay ( f_pointerPosition ) ;
 
 Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 100, Color.blue ) ;
 
@@ -112,6 +111,7 @@ Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 1
             {
             
                 NativeArray <Entity> na_netNodes = group_netNodes.ToEntityArray ( Allocator.Temp ) ;
+
 
                 if ( na_netNodes.Length == 0 ) return ; // Early exit.
 
@@ -133,7 +133,7 @@ Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 1
 
             
             CollisionFilter collisionFilter = default ;
-            collisionFilter.CollidesWith = 1 << 9 ; // Elevation Nodes.
+            collisionFilter.CollidesWith    = 1 << 9 ; // Elevation Nodes.
             // collisionFilter.CollidesWith += 1 << 1 ; // Floor.
             // collisionFilter.CollidesWith += 1 << 2 ; // Walls.
             // collisionFilter.CollidesWith += 1 << 3 ; // Ramps.
@@ -159,8 +159,8 @@ Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 1
                 if ( Input.GetMouseButtonUp ( 0 ) || Input.GetMouseButtonUp ( 1 ) )
                 {
                     
-                    ComponentDataFromEntity <PathPlannerComponents> a_pathPlanner              = GetComponentDataFromEntity <PathPlannerComponents> ( false ) ;
-                    PathPlannerComponents pathPlanner                                          = a_pathPlanner [entity] ;
+                    ComponentDataFromEntity <PathPlannerComponent> a_pathPlanners = GetComponentDataFromEntity <PathPlannerComponent> ( false ) ;
+                    PathPlannerComponent pathPlanner                              = a_pathPlanners [entity] ;
                     
 
                     if (  Input.GetMouseButtonUp ( 0 ) )
@@ -177,35 +177,95 @@ Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 1
 
                     // pathPlanner.isToggleAorB = !pathPlanner.isToggleAorB ;
 
-                    a_pathPlanner [entity] = pathPlanner ;
+                    a_pathPlanners [entity] = pathPlanner ;
 
                     if ( pathPlanner.entityA.Version > 0 && pathPlanner.entityB.Version > 0 )
                     {
                         
-Debug.Log ( "A e: " + pathPlanner.entityA + " B e: " + pathPlanner.entityB ) ;
+Debug.Log ( "Start entity: " + pathPlanner.entityA + " target entity: " + pathPlanner.entityB ) ;
 
-Dependency.Complete () ; // Just for position debug.             
-ComponentDataFromEntity <Translation> a_posDebug = GetComponentDataFromEntity <Translation> ( true ) ;
+                        na_pathPlanners = group_pathPlanner.ToEntityArray ( Allocator.TempJob ) ;
+
+                        ComponentDataFromEntity <Translation> a_pathNodesPosition  = GetComponentDataFromEntity <Translation> ( true ) ;
                         BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer = GetBufferFromEntity <PathNodeLinksBuffer> ( true ) ;
+                        BufferFromEntity <PathNodesBuffer> pathNodesBuffer         = GetBufferFromEntity <PathNodesBuffer> ( false ) ;
+                        DynamicBuffer <PathNodesBuffer> a_pathNodes                = pathNodesBuffer [entity] ;
+                        a_pathNodes.ResizeUninitialized ( 0 ) ;
+
+                        NativeArray <Entity> na_netNodes                           = group_netNodes.ToEntityArray ( Allocator.TempJob ) ;
 
 
-                        _EagerDijkstra_BesttPath ( ref pathPlanner, in nhm_entityIndex, in group_netNodes, in pathNodeLinksBuffer, in a_posDebug ) ;
+                        Dependency = new PathFindingJob ()
+                        {
+                            na_netNodes         = na_netNodes,
+                            na_pathPlanners     = na_pathPlanners,
+
+                            a_pathPlanners      = a_pathPlanners,
+                            nhm_entityIndex     = nhm_entityIndex,
+
+                            a_pathNodesPosition = a_pathNodesPosition,
+                            pathNodeLinksBuffer = pathNodeLinksBuffer,
+                            pathNodesBuffer     = pathNodesBuffer,
+
+                        }.Schedule ( na_pathPlanners.Length, 128, Dependency ) ;
+
+                        na_netNodes.Dispose ( Dependency ) ;
+                        na_pathPlanners.Dispose ( Dependency ) ;
+
                     }
 
                 }
 
             }
 
-            // becb.AddJobHandleForProducer ( Dependency ) ;
+        }
+
+
+        [BurstCompile]
+        private struct PathFindingJob : IJobParallelFor
+        {
+
+            [ReadOnly]
+            public NativeArray <Entity> na_netNodes ;
+
+            [ReadOnly]
+            public NativeArray <Entity> na_pathPlanners ;
+
+
+            [NativeDisableParallelForRestriction]
+            public ComponentDataFromEntity <PathPlannerComponent> a_pathPlanners ;
+
+            [ReadOnly]
+            public NativeHashMap <Entity, int> nhm_entityIndex ;
+
+            [ReadOnly]
+            public ComponentDataFromEntity <Translation> a_pathNodesPosition ;
+
+            [ReadOnly]
+            public BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer ;
+
+            [NativeDisableParallelForRestriction]
+            public BufferFromEntity <PathNodesBuffer> pathNodesBuffer ;
+
+            public void Execute ( int i_index )
+            { 
+
+                Entity pathPlannerEntity = na_pathPlanners [i_index] ;
+                
+                PathPlannerComponent pathPlanner = a_pathPlanners [pathPlannerEntity] ;
+
+                DynamicBuffer <PathNodesBuffer> a_pathNodes = pathNodesBuffer [pathPlannerEntity] ;
+                
+                _EagerDijkstra_BestPath ( ref pathPlanner, ref a_pathNodes, in nhm_entityIndex, in na_netNodes, in pathNodeLinksBuffer, in a_pathNodesPosition ) ;
+            }
 
         }
 
 
-        static private void _EagerDijkstra_BesttPath ( ref PathPlannerComponents pathPlanner, in NativeHashMap <Entity, int> nhm_entityIndex, in EntityQuery group_netNodes, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in ComponentDataFromEntity <Translation> a_posDebug )
-        // static private void _EagerDijkstra ( ref PathPlannerComponents pathPlanner, ref DynamicBuffer <LastIVisitedPathNodesABuffer> a_lastVisitedPathNodes, in NativeHashMap <Entity, int> nhm_entityIndex, in EntityQuery group_netNodes, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer )
+
+        static private void _EagerDijkstra_BestPath ( ref PathPlannerComponent pathPlanner, ref DynamicBuffer <PathNodesBuffer> a_pathNodes, in NativeHashMap <Entity, int> nhm_entityIndex, in NativeArray <Entity> na_netNodes, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in ComponentDataFromEntity <Translation> a_pathNodesPosition )
         {
 
-            NativeArray <Entity> na_netNodes                        = group_netNodes.ToEntityArray ( Allocator.Temp ) ;
             NativeArray <float> na_netNodesBestDistance2Node        = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
             NativeArray <bool> na_isNetNodesAlreadyVisited          = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.ClearMemory ) ;
             NativeArray <int> na_previouslyVisitedByNodeIndex       = new NativeArray <int> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
@@ -257,12 +317,12 @@ ComponentDataFromEntity <Translation> a_posDebug = GetComponentDataFromEntity <T
 
                 if ( !alternateLastVisitedPathNodes )
                 {
-                    _LooUpNextLayer ( ref na_netNodesBestDistance2Node, ref na_isNetNodesAlreadyVisited, ref na_previouslyVisitedByNodeIndex, ref na_lastVisitedPathNodesA, ref i_lastVisitedPathNodesAIndex, ref na_lastVisitedPathNodesB, ref i_lastVisitedPathNodesBIndex, ref foundShortestPath, ref lastBestPath, in nhm_entityIndex, in pathNodeLinksBuffer, in a_posDebug, targetNodeEntity ) ;
+                    _LooUpNextLayer ( ref na_netNodesBestDistance2Node, ref na_isNetNodesAlreadyVisited, ref na_previouslyVisitedByNodeIndex, ref na_lastVisitedPathNodesA, ref i_lastVisitedPathNodesAIndex, ref na_lastVisitedPathNodesB, ref i_lastVisitedPathNodesBIndex, ref foundShortestPath, ref lastBestPath, in nhm_entityIndex, in pathNodeLinksBuffer, in a_pathNodesPosition, targetNodeEntity ) ;
                     i_lastVisitedPathNodesTargetIndex = i_lastVisitedPathNodesBIndex ;
                 }
                 else
                 {
-                    _LooUpNextLayer ( ref na_netNodesBestDistance2Node, ref na_isNetNodesAlreadyVisited, ref na_previouslyVisitedByNodeIndex, ref na_lastVisitedPathNodesB, ref i_lastVisitedPathNodesBIndex, ref na_lastVisitedPathNodesA, ref i_lastVisitedPathNodesAIndex, ref foundShortestPath, ref lastBestPath, in nhm_entityIndex, in pathNodeLinksBuffer, in a_posDebug, targetNodeEntity ) ;
+                    _LooUpNextLayer ( ref na_netNodesBestDistance2Node, ref na_isNetNodesAlreadyVisited, ref na_previouslyVisitedByNodeIndex, ref na_lastVisitedPathNodesB, ref i_lastVisitedPathNodesBIndex, ref na_lastVisitedPathNodesA, ref i_lastVisitedPathNodesAIndex, ref foundShortestPath, ref lastBestPath, in nhm_entityIndex, in pathNodeLinksBuffer, in a_pathNodesPosition, targetNodeEntity ) ;
                     i_lastVisitedPathNodesTargetIndex = i_lastVisitedPathNodesAIndex ;
                 }
 
@@ -283,6 +343,8 @@ ComponentDataFromEntity <Translation> a_posDebug = GetComponentDataFromEntity <T
 
                 int i_previousNodeIndex = i_targetNodeIndex ;
 
+                float3 f3_previousPosition = 0 ;
+
                 while ( na_previouslyVisitedByNodeIndex [i_previousNodeIndex] >= 0 )
                 {
                     
@@ -292,21 +354,26 @@ ComponentDataFromEntity <Translation> a_posDebug = GetComponentDataFromEntity <T
 
                     Entity previousNodeEnity = na_netNodes [i_previousNodeIndex] ;
 
-                    float3 f3_currentPosition  = a_posDebug [currentNodeEnity].Value ;
-                    float3 f3_previousPosition = a_posDebug [previousNodeEnity].Value ;
-                    Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.red, 7 ) ;
+                    float3 f3_currentPosition  = a_pathNodesPosition [currentNodeEnity].Value ;
+                    f3_previousPosition        = a_pathNodesPosition [previousNodeEnity].Value ;
+Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.red, 7 ) ;
+                    
+                    a_pathNodes.Add ( new PathNodesBuffer () { f3_position = f3_currentPosition } ) ;
+
                 }
+
+                a_pathNodes.Add ( new PathNodesBuffer () { f3_position = f3_previousPosition } ) ;
 
             }
 
             // nhm_entityIndex.Dispose () ;
-            na_netNodesBestDistance2Node.Dispose () ;
-            na_netNodes.Dispose () ;
-            na_isNetNodesAlreadyVisited.Dispose () ;
-            na_previouslyVisitedByNodeIndex.Dispose () ;
+            // na_netNodesBestDistance2Node.Dispose () ;
+            // na_netNodes.Dispose () ;
+            // na_isNetNodesAlreadyVisited.Dispose () ;
+            // na_previouslyVisitedByNodeIndex.Dispose () ;
 
-            na_lastVisitedPathNodesA.Dispose () ;
-            na_lastVisitedPathNodesB.Dispose () ;
+            // na_lastVisitedPathNodesA.Dispose () ;
+            // na_lastVisitedPathNodesB.Dispose () ;
 
         }
 
