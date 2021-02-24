@@ -28,7 +28,8 @@ namespace Antypodish.Hove.DOTS
                 .ForEach ( ( Entity nodeEntity, int entityInQueryIndex ) => 
             {
                 ecbp.AddComponent <PathNodeElevationComponent> ( entityInQueryIndex, nodeEntity ) ;
-
+                ecbp.AddBuffer <PathNodeLinksBuffer> ( entityInQueryIndex, nodeEntity ) ;
+                
             }).ScheduleParallel () ;
             
             becb.AddJobHandleForProducer ( Dependency ) ;

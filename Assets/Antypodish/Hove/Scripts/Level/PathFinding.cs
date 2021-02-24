@@ -113,7 +113,7 @@ Debug.Log ( "Target node: " + l_path.Count + "; " + V3_destinationNodePosition.T
             Dictionary <Vector3, Node> dic_mappedNodesForWeight = new Dictionary <Vector3, Node> ( i_nodesCount ) ;
 
             // Initial search.
-            _SearchNeghbourNodes ( startNode, targetNode, PathNodes.dic_nodesNetwork, i_nodesCount, ref dic_nodePositionAndWeight, ref dic_mappedNodesForWeight, i_weight ) ;
+            _SearchNeighbourNodes ( startNode, targetNode, PathNodes.dic_nodesNetwork, i_nodesCount, ref dic_nodePositionAndWeight, ref dic_mappedNodesForWeight, i_weight ) ;
 
             int i_whileWatchdog = 0 ;
             while ( !_SearchAStart ( targetNode, PathNodes.dic_nodesNetwork, i_nodesCount, ref dic_nodePositionAndWeight, ref dic_mappedNodesForWeight, ref i_weight ) )
@@ -180,7 +180,7 @@ Debug.Log ( "Target node: " + l_path.Count + "; " + V3_destinationNodePosition.T
             // Recursive search.
             foreach ( Node nextNode in dic_mappedNodesForWeight.Values )
             {
-                isTargetNodeReached = _SearchNeghbourNodes ( nextNode, targetNode, dic_nodesNetwork, i_nodesCount, ref dic_nodePositionAndWeight, ref dic_mappedNodesForWeightNext, i_weight ) ;
+                isTargetNodeReached = _SearchNeighbourNodes ( nextNode, targetNode, dic_nodesNetwork, i_nodesCount, ref dic_nodePositionAndWeight, ref dic_mappedNodesForWeightNext, i_weight ) ;
                 canProceed = true && !isTargetNodeReached ;
             }
         
@@ -193,7 +193,7 @@ Debug.Log ( "Target node: " + l_path.Count + "; " + V3_destinationNodePosition.T
         
             foreach ( Node nextNode in dic_mappedNodesForWeightNext.Values )
             {
-                isTargetNodeReached = _SearchNeghbourNodes ( nextNode, targetNode, dic_nodesNetwork, i_nodesCount, ref dic_nodePositionAndWeight, ref dic_mappedNodesForWeight, i_weight ) ;
+                isTargetNodeReached = _SearchNeighbourNodes ( nextNode, targetNode, dic_nodesNetwork, i_nodesCount, ref dic_nodePositionAndWeight, ref dic_mappedNodesForWeight, i_weight ) ;
                 canProceed = true ;
             }
 
@@ -203,7 +203,7 @@ Debug.Log ( "Target node: " + l_path.Count + "; " + V3_destinationNodePosition.T
 
         }
 
-        static private bool _SearchNeghbourNodes ( in Node startNode, in Node targetNode, in Dictionary <Vector3, List <Node>> dic_nodesNetwork, int i_nodesCount, ref Dictionary <Vector3, MappedNode> dic_nodePositionAndWeight, ref Dictionary <Vector3, Node> dic_mappedNodesForWeight, int i_weight )
+        static private bool _SearchNeighbourNodes ( in Node startNode, in Node targetNode, in Dictionary <Vector3, List <Node>> dic_nodesNetwork, int i_nodesCount, ref Dictionary <Vector3, MappedNode> dic_nodePositionAndWeight, ref Dictionary <Vector3, Node> dic_mappedNodesForWeight, int i_weight )
         {
 
             if ( ( targetNode.f3_position - startNode.f3_position ).sqrMagnitude < 1 ) 

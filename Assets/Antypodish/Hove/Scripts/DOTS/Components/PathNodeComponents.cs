@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-
-using Unity.Entities;
-using Unity.Transforms ;
+﻿using Unity.Entities;
+using Unity.Mathematics ;
 
 namespace Antypodish.Hove.DOTS
 {
@@ -10,5 +8,12 @@ namespace Antypodish.Hove.DOTS
     {
         public float f ;
     }
-
+    
+    [InternalBufferCapacity ( 10 )]
+    public struct PathNodeLinksBuffer : IBufferElementData
+    {
+        public Entity entity ;
+        public float3 f3 ;
+        public float f_distance ;
+    }
 }

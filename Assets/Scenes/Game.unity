@@ -10829,6 +10829,14 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 7926056673175426435, guid: bfc70583d68c83547b8bd6a4d61fb23d, type: 3}
+      propertyPath: m_Material.m_BelongsToCategories.m_Value.Category00
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7926056673175426435, guid: bfc70583d68c83547b8bd6a4d61fb23d, type: 3}
+      propertyPath: m_Material.m_BelongsToCategories.m_Value.Category01
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bfc70583d68c83547b8bd6a4d61fb23d, type: 3}
 --- !u!4 &887761292 stripped
@@ -11385,6 +11393,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6712860759344112617, guid: a68e771f15d3377469be2d9898e00001, type: 3}
+      propertyPath: linkedEntity
+      value: 
+      objectReference: {fileID: 1766583369}
     - target: {fileID: 6778744589707518115, guid: a68e771f15d3377469be2d9898e00001, type: 3}
       propertyPath: m_Name
       value: PathNode (15)
@@ -11860,6 +11872,14 @@ PrefabInstance:
     - target: {fileID: 7493864559129009356, guid: f4dbf5e668af4934da1b305d89f46e83, type: 3}
       propertyPath: m_Name
       value: Wall (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8280075398813923253, guid: f4dbf5e668af4934da1b305d89f46e83, type: 3}
+      propertyPath: m_Material.m_BelongsToCategories.m_Value.Category01
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8280075398813923253, guid: f4dbf5e668af4934da1b305d89f46e83, type: 3}
+      propertyPath: m_Material.m_BelongsToCategories.m_Value.Category00
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f4dbf5e668af4934da1b305d89f46e83, type: 3}
@@ -12972,7 +12992,7 @@ GameObject:
   - component: {fileID: 1689714860}
   m_Layer: 0
   m_Name: Main Camera
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -13377,6 +13397,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 5979565921150474412, guid: f4dbf5e668af4934da1b305d89f46e83, type: 3}
   m_PrefabInstance: {fileID: 1738725333}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1766583369 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6778744589707518115, guid: a68e771f15d3377469be2d9898e00001, type: 3}
+  m_PrefabInstance: {fileID: 1009645984}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1778473854
 GameObject:
@@ -14629,6 +14654,10 @@ PrefabInstance:
     - target: {fileID: 6778744589707518115, guid: a68e771f15d3377469be2d9898e00001, type: 3}
       propertyPath: m_Name
       value: PathNode
+      objectReference: {fileID: 0}
+    - target: {fileID: 6778744589707518115, guid: a68e771f15d3377469be2d9898e00001, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a68e771f15d3377469be2d9898e00001, type: 3}
