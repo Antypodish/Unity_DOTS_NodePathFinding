@@ -7,6 +7,7 @@ using Unity.Burst ;
 using Unity.Entities ;
 using Unity.Transforms ;
 using Unity.Collections ;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics ;
 
 using Antypodish.DOTS ;
@@ -138,7 +139,7 @@ namespace Antypodish.NodePathFinding.DOTS
                 pathNodesBufferHandle           = GetBufferTypeHandle <PathNodesBuffer> ( false ),
 
 
-            }.Schedule ( group_pathPlanners, Dependency ) ;
+            }.ScheduleParallel ( group_pathPlanners, 1, Dependency ) ;
 
             Entities
                 .WithName ( "PathSearchedJob" )
@@ -155,7 +156,7 @@ namespace Antypodish.NodePathFinding.DOTS
 
 
         [BurstCompile]
-        private struct PathFindingJob : IJobChunk
+        private struct PathFindingJob : IJobEntityBatch // IJobChunk
         {
 
             [ReadOnly]
@@ -198,19 +199,55 @@ namespace Antypodish.NodePathFinding.DOTS
             [NativeDisableParallelForRestriction]
             public BufferTypeHandle <PathNodesBuffer> pathNodesBufferHandle ;
 
+            
+            // Prevent memory allocation
+            // [NativeDisableParallelForRestriction] 
+            [NativeDisableContainerSafetyRestriction] 
+            private NativeArray <float> na_netNodesBestDistance2Node ;
+            // [NativeDisableParallelForRestriction] 
+            [NativeDisableContainerSafetyRestriction] 
+            private NativeArray <bool> na_isNetNodesAlreadyVisited ;
+            // [NativeDisableParallelForRestriction] 
+            [NativeDisableContainerSafetyRestriction] 
+            private NativeArray <int> na_previouslyVisitedByNodeIndex ;
+            
+            // [NativeDisableParallelForRestriction] 
+            [NativeDisableContainerSafetyRestriction] 
+            private NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA ;
+            // [NativeDisableParallelForRestriction] 
+            [NativeDisableContainerSafetyRestriction]
+            private NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB ;
+            
+            // [NativeDisableParallelForRestriction] 
+            [NativeDisableContainerSafetyRestriction]
+            NativeArray <PathPlannerComponent> na_pathPlanners ;
+            
 
-            public void Execute ( ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex )
+            public void Execute ( ArchetypeChunk batchInChunk, int batchIndex )
             { 
 
+                
+                na_netNodesBestDistance2Node    = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
+                na_isNetNodesAlreadyVisited     = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
+                na_previouslyVisitedByNodeIndex = new NativeArray <int> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
+
+                na_lastVisitedPathNodesA        = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
+                na_lastVisitedPathNodesB        = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
+
+                na_pathPlanners          = batchInChunk.GetNativeArray ( pathPlannersHandle ) ;
+                
+
+                /*
                 NativeArray <float> na_netNodesBestDistance2Node            = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 NativeArray <bool> na_isNetNodesAlreadyVisited              = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 NativeArray <int> na_previouslyVisitedByNodeIndex           = new NativeArray <int> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
 
                 NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-
-                NativeArray <PathPlannerComponent> na_pathPlanners = chunk.GetNativeArray ( pathPlannersHandle ) ;
-                BufferAccessor <PathNodesBuffer> pathNodesBuffer   = chunk.GetBufferAccessor <PathNodesBuffer> ( pathNodesBufferHandle ) ;
+                
+                NativeArray <PathPlannerComponent> na_pathPlanners          = batchInChunk.GetNativeArray ( pathPlannersHandle ) ;
+                */
+                BufferAccessor <PathNodesBuffer> pathNodesBuffer            = batchInChunk.GetBufferAccessor <PathNodesBuffer> ( pathNodesBufferHandle ) ;
 
                 for ( int i = 0; i < na_pathPlanners.Length; i ++ )
                 {
@@ -325,7 +362,7 @@ namespace Antypodish.NodePathFinding.DOTS
 
                     float3 f3_currentPosition  = a_pathNodesPosition [currentNodeEnity].Value ;
                     f3_previousPosition        = a_pathNodesPosition [previousNodeEnity].Value ;
-Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
+// Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
                     
                     a_pathNodes.Add ( new PathNodesBuffer () { f3_position = f3_currentPosition } ) ;
 
@@ -375,7 +412,7 @@ float3 f3_currentNodePos = a_posDebug [lastVisitedPathNodes.entity].Value ;
  
 float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
 
-Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.white, 2 ) ;  
+// Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.white, 2 ) ;  
                     
                     float f_weight2NextNode = f_weight2ThisNode + f_nextNodeDistance ;
 
