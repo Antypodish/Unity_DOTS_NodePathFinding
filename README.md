@@ -1,4 +1,4 @@
-# Unity_DOTS_NodePathFinding
+# Unity DOTS Node based Path Finding
 
 Unity DOTS node based path finding, using Eager Dijkstra modified Shortest Path algorithm
 
