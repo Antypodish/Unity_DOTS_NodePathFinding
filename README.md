@@ -15,6 +15,8 @@ Further path planner entities allow for searching best path.
 Setting are set for 100 entities by default, in OrderNewPathSystem.cs.
 Tested with 10k path planner entities. But advise to comment out debugging raycast, which is in PathFindingSystem.
 
+![Watch the video](https://forum.unity.com/attachments/upload_2021-2-25_2-2-2-png.802490/)
+
 
 ## Generation
 
@@ -27,6 +29,8 @@ Distances as weights are stored, with relation between nodes.
 Regarding elevation, like ram, nodes need to be marked manually, via inspector, with which other node link is allowed. That should be done in most cases for both up and down nodes.
 
 That relation is added to network of nodes.
+
+![Watch the video](https://forum.unity.com/attachments/upload_2021-2-25_2-2-21-png.802493/)
 
 
 ## Path Finding
