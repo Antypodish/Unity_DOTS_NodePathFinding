@@ -1,6 +1,8 @@
 # Unity DOTS Node based Path Finding
 
 Unity DOTS node based path finding, using Eager Dijkstra modified Shortest Path algorithm
+Please see Unity DOTS forum for discussions.
+https://forum.unity.com/threads/dots-node-based-path-finding-eager-dijkstra.1064294/
 
 
 ## Scene
@@ -41,3 +43,8 @@ Only left and right clicks.
 Left click on the node in the game view, is starting point, right click is the end point of the path.
 
 More will come soon.
+
+
+## Support
+
+If you appricate my work, please star my repo. Many thanks :)
