@@ -32,7 +32,7 @@ namespace Antypodish.NodePathFinding.DOTS
         bool isSystemInitialized ;
 
         /// <summary>
-        /// Path finding will alternate between last visited buffer, to find next linked nodes.
+        /// Path finding will alternate between last visited path nodes' store, to find next linked nodes.
         /// </summary>
         public struct LastVisitedPathNodes
         {
@@ -109,28 +109,11 @@ namespace Antypodish.NodePathFinding.DOTS
 
             EntityCommandBuffer.ParallelWriter ecbp = eecb.CreateCommandBuffer ().AsParallelWriter () ;
 
-            
-            // na_netNodes = group_netNodes.ToEntityArray ( Allocator.TempJob ) ;
-            
-            // NativeArray <float> na_netNodesBestDistance2Node        = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-            // NativeArray <bool> na_isNetNodesAlreadyVisited          = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.ClearMemory ) ;
-            // NativeArray <int> na_previouslyVisitedByNodeIndex       = new NativeArray <int> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-
-            // NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory ) ;
-            // NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory ) ;
-
 
             Dependency = new PathFindingJob ()
             {
                 na_netNodes                     = na_netNodes,
-                /*
-                na_netNodesBestDistance2Node    = new NativeArray <float> ( na_netNodes.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory ),
-                na_isNetNodesAlreadyVisited     = new NativeArray <bool> ( na_netNodes.Length, Allocator.TempJob, NativeArrayOptions.ClearMemory ),
-                na_previouslyVisitedByNodeIndex = new NativeArray <int> ( na_netNodes.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory ),
-
-                na_lastVisitedPathNodesA        = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory ),
-                na_lastVisitedPathNodesB        = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory ),
-                */
+                
                 nhm_entityIndex                 = nhm_entityIndex,
                 a_pathNodesPosition             = GetComponentDataFromEntity <Translation> ( true ),
                 pathNodeLinksBuffer             = GetBufferFromEntity <PathNodeLinksBuffer> ( true ),
@@ -162,27 +145,6 @@ namespace Antypodish.NodePathFinding.DOTS
             [ReadOnly]
             public NativeArray <Entity> na_netNodes ;
 
-            /*
-            [NativeDisableParallelForRestriction]
-            [DeallocateOnJobCompletion]
-            public NativeArray <float> na_netNodesBestDistance2Node ;
-
-            [NativeDisableParallelForRestriction]
-            [DeallocateOnJobCompletion]
-            public NativeArray <bool> na_isNetNodesAlreadyVisited ;
-
-            [NativeDisableParallelForRestriction]
-            [DeallocateOnJobCompletion]
-            public NativeArray <int> na_previouslyVisitedByNodeIndex ;
-
-            [NativeDisableParallelForRestriction]
-            [DeallocateOnJobCompletion]
-            public NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA ;
-            
-            [NativeDisableParallelForRestriction]
-            [DeallocateOnJobCompletion]
-            public NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB ;
-            */
 
             [ReadOnly]
             public NativeHashMap <Entity, int> nhm_entityIndex ;
@@ -224,66 +186,23 @@ namespace Antypodish.NodePathFinding.DOTS
             // [ReadOnly]
             NativeArray <PathPlannerComponent> na_pathPlanners ;
 
-            /*
-            [NativeDisableParallelForRestriction] 
-            // [NativeDisableContainerSafetyRestriction]
-            DynamicBuffer <float> na_netNodesBestDistance2Node ;
-
-            [NativeDisableParallelForRestriction] 
-            // [NativeDisableContainerSafetyRestriction]
-            DynamicBuffer <bool> na_isNetNodesAlreadyVisited ;
-
-            [NativeDisableParallelForRestriction] 
-            // [NativeDisableContainerSafetyRestriction]
-            DynamicBuffer <int> na_previouslyVisitedByNodeIndex ;
-
-            [NativeDisableParallelForRestriction] 
-            // [NativeDisableContainerSafetyRestriction]
-            DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesA ;
-            [NativeDisableParallelForRestriction] 
-            // [NativeDisableContainerSafetyRestriction]
-            DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesB ;
-            */
+           
             public void Execute ( ArchetypeChunk batchInChunk, int batchIndex )
             { 
 
-                /*
-                na_netNodesBestDistance2Node = new DynamicBuffer <float> () ;
-                na_netNodesBestDistance2Node.ResizeUninitialized ( na_netNodes.Length ) ;
-                 
-                na_isNetNodesAlreadyVisited = new DynamicBuffer <bool> () ;
-                na_isNetNodesAlreadyVisited.ResizeUninitialized ( na_netNodes.Length ) ;
-                
-                na_previouslyVisitedByNodeIndex = new DynamicBuffer <int> () ;
-                na_previouslyVisitedByNodeIndex.ResizeUninitialized ( na_netNodes.Length ) ;
-
-                na_lastVisitedPathNodesA = new DynamicBuffer <LastVisitedPathNodes> () ;
-                na_lastVisitedPathNodesA.ResizeUninitialized ( na_netNodes.Length ) ;
-                
-                na_lastVisitedPathNodesB = new DynamicBuffer <LastVisitedPathNodes> () ;
-                na_lastVisitedPathNodesB.ResizeUninitialized ( na_netNodes.Length ) ;
-                */
                 
                 na_netNodesBestDistance2Node    = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 na_isNetNodesAlreadyVisited     = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 na_previouslyVisitedByNodeIndex = new NativeArray <int> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
 
+                
+                // Path finding will alternate between last visited buffer, to find next linked nodes.
                 na_lastVisitedPathNodesA        = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 na_lastVisitedPathNodesB        = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 
                 na_pathPlanners                 = batchInChunk.GetNativeArray ( pathPlannersHandle ) ;
                 
 
-                /*
-                NativeArray <float> na_netNodesBestDistance2Node            = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-                NativeArray <bool> na_isNetNodesAlreadyVisited              = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-                NativeArray <int> na_previouslyVisitedByNodeIndex           = new NativeArray <int> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-
-                NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-                NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-                
-                NativeArray <PathPlannerComponent> na_pathPlanners          = batchInChunk.GetNativeArray ( pathPlannersHandle ) ;
-                */
                 BufferAccessor <PathNodesBuffer> pathNodesBuffer            = batchInChunk.GetBufferAccessor <PathNodesBuffer> ( pathNodesBufferHandle ) ;
 
                 for ( int i = 0; i < na_pathPlanners.Length; i ++ )
@@ -302,15 +221,8 @@ namespace Antypodish.NodePathFinding.DOTS
         }
 
 
-        
-        // static private void _EagerDijkstra_BestPath ( ref PathPlannerComponent pathPlanner, ref DynamicBuffer <PathNodesBuffer> a_pathNodes, ref DynamicBuffer <float> na_netNodesBestDistance2Node, ref DynamicBuffer <bool> na_isNetNodesAlreadyVisited, ref DynamicBuffer <int> na_previouslyVisitedByNodeIndex, ref DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesA, ref DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesB , in NativeHashMap <Entity, int> nhm_entityIndex, in NativeArray <Entity> na_netNodes, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in ComponentDataFromEntity <Translation> a_pathNodesPosition )
         static private void _EagerDijkstra_BestPath ( ref PathPlannerComponent pathPlanner, ref DynamicBuffer <PathNodesBuffer> a_pathNodes, ref NativeArray <float> na_netNodesBestDistance2Node, ref NativeArray <bool> na_isNetNodesAlreadyVisited, ref NativeArray <int> na_previouslyVisitedByNodeIndex, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB , in NativeHashMap <Entity, int> nhm_entityIndex, in NativeArray <Entity> na_netNodes, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in ComponentDataFromEntity <Translation> a_pathNodesPosition )
         {
-
-            // NativeArray <float> na_netNodesBestDistance2Node        = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-            // NativeArray <bool> na_isNetNodesAlreadyVisited          = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.ClearMemory ) ;
-            // NativeArray <int> na_previouslyVisitedByNodeIndex       = new NativeArray <int> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-
 
             // Reset.
             for ( int i = 0; i < na_isNetNodesAlreadyVisited.Length; i ++ )
@@ -321,10 +233,6 @@ namespace Antypodish.NodePathFinding.DOTS
             Entity startingNodeEntity                               = pathPlanner.entityA ;
             Entity targetNodeEntity                                 = pathPlanner.entityB ;
             
-            // Path finding will alternate between last visited buffer, to find next linked nodes.
-            // NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-            // NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-
             // Set initial infinity max distances for nodes.
             // If final results of nodes will stay infity, that means is unreachable.
             for ( int i = 0; i < na_netNodesBestDistance2Node.Length; i ++ )
@@ -400,7 +308,7 @@ namespace Antypodish.NodePathFinding.DOTS
 
                     float3 f3_currentPosition  = a_pathNodesPosition [currentNodeEnity].Value ;
                     f3_previousPosition        = a_pathNodesPosition [previousNodeEnity].Value ;
-// Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
+Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
                     
                     a_pathNodes.Add ( new PathNodesBuffer () { f3_position = f3_currentPosition } ) ;
 
@@ -450,8 +358,7 @@ float3 f3_currentNodePos = a_posDebug [lastVisitedPathNodes.entity].Value ;
                     nhm_entityIndex.TryGetValue ( nextNodeEntity, out int i_nextNodeIndex ) ;
  
 float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
-
-// Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.white, 2 ) ;  
+ 
                     
                     float f_weight2NextNode = f_weight2ThisNode + f_nextNodeDistance ;
 
@@ -483,6 +390,9 @@ float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
                     // If node is already not visited.
                     if ( !na_isNetNodesAlreadyVisited [i_nextNodeIndex] && f_weight2NextNode <= na_netNodesBestDistance2Node [i_nextNodeIndex] )
                     {
+
+Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.white, 2 ) ; 
+
                         na_netNodesBestDistance2Node [i_nextNodeIndex] = f_weight2NextNode ;
 
                         na_previouslyVisitedByNodeIndex [i_nextNodeIndex] = i_nodeIndex ;
@@ -508,7 +418,6 @@ float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
         /// Sort weights in ascending order.
         /// </summary>
         /// <param name="a_lastVisitedPathNodes"></param>
-        // static private void _BubbleSort ( ref DynamicBuffer <LastVisitedPathNodes> na_lastIVisitedPathNodes, int i_lastVisitedPathNodesSorceIndex )
         static private void _BubbleSort ( ref NativeArray <LastVisitedPathNodes> na_lastIVisitedPathNodes, int i_lastVisitedPathNodesSorceIndex )
         {
             

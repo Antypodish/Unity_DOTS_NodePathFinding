@@ -67,6 +67,13 @@ namespace Antypodish.NodePathFinding.DOTS
 
             CollisionWorld collisionWorld = buildPhysicsWorld.PhysicsWorld.CollisionWorld ;
             
+            CollisionFilter collisionFilter = default ;
+            collisionFilter.CollidesWith = 1 << (int) CollisionFilters.ElevationNodes ; // Elevation Nodes.
+            collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Floor ; // Floor.
+            collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Walls ; // Walls.
+            collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Ramps ; // Ramps.
+            collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Other ; // Other. // Optional
+
             Entities.WithName ( "SetPathNodesEleveationEntityJob" )
                 .WithAll <PathNodeTag> ()
                 .WithNone <IsInitializedTag> ()
@@ -82,6 +89,7 @@ namespace Antypodish.NodePathFinding.DOTS
             Dependency = new AddPathLinksJob ()
             {
                 collisionWorld            = collisionWorld,
+                collisionFilter           = collisionFilter,
                 nmhm_pathNodesByElevation = nmhm_pathNodesByElevation,
                 a_position                = a_position,
                 a_pathNodeElevationLink   = GetComponentDataFromEntity <PathNodeElevationLinkComponent> ( true ),
@@ -137,6 +145,9 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
             public CollisionWorld collisionWorld ;
 
             [ReadOnly]
+            public CollisionFilter collisionFilter ;
+
+            [ReadOnly]
             public NativeMultiHashMap <float, Entity> nmhm_pathNodesByElevation ;
 
             [ReadOnly]
@@ -189,11 +200,7 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
                     
                     NativeList <Unity.Physics.RaycastHit> nl_allHits = new NativeList <Unity.Physics.RaycastHit> ( i_pathNodeIndex, Allocator.Temp ) ;
                     
-                    CollisionFilter collisionFilter = default ;
-                    collisionFilter.CollidesWith = 1 << 9 ; // Elevation Nodes.
-                    collisionFilter.CollidesWith += 1 << 1 ; // Floor.
-                    collisionFilter.CollidesWith += 1 << 2 ; // Walls.
-                    collisionFilter.CollidesWith += 1 << 3 ; // Ramps.
+                    
 
                     // Iterate though nodes on a given level.
                     for ( int j = 0; j < i_pathNodeIndex; j ++ )

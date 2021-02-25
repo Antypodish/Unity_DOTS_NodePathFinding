@@ -71,7 +71,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
             {
                 Entity pathPlannerPrefabEntity = EntityManager.CreateEntity ( entityArchetype ) ;
                 // EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannar" ) ;
-                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 10000, Allocator.Temp ) ;
+                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 100, Allocator.Temp ) ;
                 na_pathPLannerEntities.Dispose () ;
             
                 //EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannarPrefab" ) ;
@@ -102,19 +102,20 @@ namespace Antypodish.NodePathFindingExample.DOTS
             float3 f_pointerPosition             = Input.mousePosition ;
             UnityEngine.Ray pointerRay           = Camera.main.ScreenPointToRay ( f_pointerPosition ) ;
 
-Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 100, Color.blue ) ;
+Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 200, Color.blue ) ;
 
             
             CollisionFilter collisionFilter = default ;
-            collisionFilter.CollidesWith    = 1 << 9 ; // Elevation Nodes.
-            // collisionFilter.CollidesWith += 1 << 1 ; // Floor.
-            // collisionFilter.CollidesWith += 1 << 2 ; // Walls.
-            // collisionFilter.CollidesWith += 1 << 3 ; // Ramps.
+            collisionFilter.CollidesWith    = 1 << (int) CollisionFilters.ElevationNodes ; // Elevation Nodes.
+            // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Floor ; // Floor.
+            // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Walls ; // Walls.
+            // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Ramps ; // Ramps.
+            // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Other ; // Other. // Optional
 
             var raycastInput = new RaycastInput
             {
                 Start  = pointerRay.origin,
-                End    = pointerRay.origin + pointerRay.direction * 100,
+                End    = pointerRay.origin + pointerRay.direction * 200,
                 Filter = CollisionFilter.Default
             } ;
                     
@@ -128,6 +129,8 @@ Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 1
 
                 if ( Input.GetMouseButtonUp ( 0 ) || Input.GetMouseButtonUp ( 1 ) )
                 {
+   
+Debug.Log ( "Hits: " + collector.ClosestHit.Entity + " @ pos: " + collector.ClosestHit.Position ) ;
                     
                     ComponentDataFromEntity <PathPlannerComponent> a_pathPlanners = GetComponentDataFromEntity <PathPlannerComponent> ( false ) ;
                     
