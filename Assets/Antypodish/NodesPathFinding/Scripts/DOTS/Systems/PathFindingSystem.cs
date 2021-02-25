@@ -218,14 +218,51 @@ namespace Antypodish.NodePathFinding.DOTS
             [NativeDisableContainerSafetyRestriction]
             private NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB ;
             
+            
             // [NativeDisableParallelForRestriction] 
             [NativeDisableContainerSafetyRestriction]
+            // [ReadOnly]
             NativeArray <PathPlannerComponent> na_pathPlanners ;
-            
 
+            /*
+            [NativeDisableParallelForRestriction] 
+            // [NativeDisableContainerSafetyRestriction]
+            DynamicBuffer <float> na_netNodesBestDistance2Node ;
+
+            [NativeDisableParallelForRestriction] 
+            // [NativeDisableContainerSafetyRestriction]
+            DynamicBuffer <bool> na_isNetNodesAlreadyVisited ;
+
+            [NativeDisableParallelForRestriction] 
+            // [NativeDisableContainerSafetyRestriction]
+            DynamicBuffer <int> na_previouslyVisitedByNodeIndex ;
+
+            [NativeDisableParallelForRestriction] 
+            // [NativeDisableContainerSafetyRestriction]
+            DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesA ;
+            [NativeDisableParallelForRestriction] 
+            // [NativeDisableContainerSafetyRestriction]
+            DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesB ;
+            */
             public void Execute ( ArchetypeChunk batchInChunk, int batchIndex )
             { 
 
+                /*
+                na_netNodesBestDistance2Node = new DynamicBuffer <float> () ;
+                na_netNodesBestDistance2Node.ResizeUninitialized ( na_netNodes.Length ) ;
+                 
+                na_isNetNodesAlreadyVisited = new DynamicBuffer <bool> () ;
+                na_isNetNodesAlreadyVisited.ResizeUninitialized ( na_netNodes.Length ) ;
+                
+                na_previouslyVisitedByNodeIndex = new DynamicBuffer <int> () ;
+                na_previouslyVisitedByNodeIndex.ResizeUninitialized ( na_netNodes.Length ) ;
+
+                na_lastVisitedPathNodesA = new DynamicBuffer <LastVisitedPathNodes> () ;
+                na_lastVisitedPathNodesA.ResizeUninitialized ( na_netNodes.Length ) ;
+                
+                na_lastVisitedPathNodesB = new DynamicBuffer <LastVisitedPathNodes> () ;
+                na_lastVisitedPathNodesB.ResizeUninitialized ( na_netNodes.Length ) ;
+                */
                 
                 na_netNodesBestDistance2Node    = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 na_isNetNodesAlreadyVisited     = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
@@ -233,8 +270,8 @@ namespace Antypodish.NodePathFinding.DOTS
 
                 na_lastVisitedPathNodesA        = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 na_lastVisitedPathNodesB        = new NativeArray <LastVisitedPathNodes> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
-
-                na_pathPlanners          = batchInChunk.GetNativeArray ( pathPlannersHandle ) ;
+                
+                na_pathPlanners                 = batchInChunk.GetNativeArray ( pathPlannersHandle ) ;
                 
 
                 /*
@@ -265,7 +302,8 @@ namespace Antypodish.NodePathFinding.DOTS
         }
 
 
-
+        
+        // static private void _EagerDijkstra_BestPath ( ref PathPlannerComponent pathPlanner, ref DynamicBuffer <PathNodesBuffer> a_pathNodes, ref DynamicBuffer <float> na_netNodesBestDistance2Node, ref DynamicBuffer <bool> na_isNetNodesAlreadyVisited, ref DynamicBuffer <int> na_previouslyVisitedByNodeIndex, ref DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesA, ref DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesB , in NativeHashMap <Entity, int> nhm_entityIndex, in NativeArray <Entity> na_netNodes, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in ComponentDataFromEntity <Translation> a_pathNodesPosition )
         static private void _EagerDijkstra_BestPath ( ref PathPlannerComponent pathPlanner, ref DynamicBuffer <PathNodesBuffer> a_pathNodes, ref NativeArray <float> na_netNodesBestDistance2Node, ref NativeArray <bool> na_isNetNodesAlreadyVisited, ref NativeArray <int> na_previouslyVisitedByNodeIndex, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesA, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesB , in NativeHashMap <Entity, int> nhm_entityIndex, in NativeArray <Entity> na_netNodes, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in ComponentDataFromEntity <Translation> a_pathNodesPosition )
         {
 
@@ -375,6 +413,7 @@ namespace Antypodish.NodePathFinding.DOTS
         }
 
 
+        // static private void _LooUpNextLayer ( ref DynamicBuffer <float> na_netNodesBestDistance2Node, ref DynamicBuffer <bool> na_isNetNodesAlreadyVisited, ref DynamicBuffer <int> na_previouslyVisitedByNodeIndex, ref DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesSource, ref int i_lastVisitedPathNodesSourceIndex, ref DynamicBuffer <LastVisitedPathNodes> na_lastVisitedPathNodesTarget, ref int i_lastVisitedPathNodesTargetIndex, ref bool foundShortestPath, ref LastBestPath lastBestPath, in NativeHashMap <Entity, int> nhm_entityIndex, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in ComponentDataFromEntity <Translation> a_posDebug, Entity targetNodeEntity )
         static private void _LooUpNextLayer ( ref NativeArray <float> na_netNodesBestDistance2Node, ref NativeArray <bool> na_isNetNodesAlreadyVisited, ref NativeArray <int> na_previouslyVisitedByNodeIndex, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesSource, ref int i_lastVisitedPathNodesSourceIndex, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesTarget, ref int i_lastVisitedPathNodesTargetIndex, ref bool foundShortestPath, ref LastBestPath lastBestPath, in NativeHashMap <Entity, int> nhm_entityIndex, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in ComponentDataFromEntity <Translation> a_posDebug, Entity targetNodeEntity )
         {
 
@@ -469,6 +508,7 @@ float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
         /// Sort weights in ascending order.
         /// </summary>
         /// <param name="a_lastVisitedPathNodes"></param>
+        // static private void _BubbleSort ( ref DynamicBuffer <LastVisitedPathNodes> na_lastIVisitedPathNodes, int i_lastVisitedPathNodesSorceIndex )
         static private void _BubbleSort ( ref NativeArray <LastVisitedPathNodes> na_lastIVisitedPathNodes, int i_lastVisitedPathNodesSorceIndex )
         {
             
