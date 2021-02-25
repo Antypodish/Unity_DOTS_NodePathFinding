@@ -92,6 +92,7 @@ namespace Antypodish.NodePathFinding.DOTS
                 collisionFilter           = collisionFilter,
                 nmhm_pathNodesByElevation = nmhm_pathNodesByElevation,
                 a_position                = a_position,
+                a_pathNodeLinkRange       = GetComponentDataFromEntity <PathNodeLinkRangeComponent> ( true ),
                 a_pathNodeElevationLink   = GetComponentDataFromEntity <PathNodeElevationLinkComponent> ( true ),
                 pathNodeLinksBuffer       = GetBufferFromEntity <PathNodeLinksBuffer> ( false )
 
@@ -154,6 +155,9 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
             public ComponentDataFromEntity <Translation> a_position ;
             
             [ReadOnly]
+            public ComponentDataFromEntity <PathNodeLinkRangeComponent> a_pathNodeLinkRange ;
+
+            [ReadOnly]
             public ComponentDataFromEntity <PathNodeElevationLinkComponent> a_pathNodeElevationLink ;
 
             [NativeDisableParallelForRestriction]
@@ -210,6 +214,10 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
                         float3 f3_pathNodePosition                          = a_position [pathNodeEntity].Value ;
 
                         DynamicBuffer <PathNodeLinksBuffer> a_pathNodeLinks = pathNodeLinksBuffer [pathNodeEntity] ;
+                        PathNodeLinkRangeComponent pathNodeLinkRange        = a_pathNodeLinkRange [pathNodeEntity] ;
+
+                        // If max range is less than 0, then any range is acceptable.
+                        float f_maxRange                                    = pathNodeLinkRange.f_maxRange < 0 ? math.INFINITY : pathNodeLinkRange.f_maxRange ;
 
                         // Lookup for linked near nodes on a given level.
                         for ( int k = 0; k < i_pathNodeIndex; k ++ )
@@ -240,29 +248,32 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
 // Ray to any next node.
 Debug.DrawLine ( f3_pathNodePosition, f3_endPoint, Color.grey, 2 ) ;                    
 
-                                float f_closestHitDistance = 999999 ;
-                                float3 f3_closestPosition  = 0 ;
-                                Entity closestEntity       = default ;
+                                float f_closestHitDistance          = math.INFINITY ;
+                                float3 f3_closestNodePositionDebug  = 0 ;
+                                Entity closestEntity                = default ;
+
+                                
 
                                 // Get closest hit.
                                 for ( int l = 0; l < nl_allHits.Length; l ++ ) 
                                 {
 
                                     Unity.Physics.RaycastHit hit = nl_allHits [l] ;
-
-                                    float f_distance = math.lengthsq ( hit.Position - f3_pathNodePosition ) ;
+                                    
+                                    float3 f3_clostHitPosition = hit.Position ;
+                                    float f_distance           = math.length ( f3_clostHitPosition - f3_pathNodePosition ) ;
                                     // Debug.Log ( "#" + k + "; f: " + f ) ;
 
+                                    
 
-
-                                    if ( f_distance > 1 && f_distance <= f_closestHitDistance )
+                                    if ( f_distance > 1 && f_distance <= f_closestHitDistance && f_distance < f_maxRange )
                                     {
                                         // Debug.Log ( "Closest hit: " + hit.point + "; at distance: " + hit.distance ) ;
                                         // closestHit = hit ;
 
-                                        f_closestHitDistance = f_distance ;
-                                        f3_closestPosition   = hit.Position ;
-                                        closestEntity        = hit.Entity ;
+                                        f_closestHitDistance        = f_distance ;
+                                        f3_closestNodePositionDebug = f3_clostHitPosition ;
+                                        closestEntity               = hit.Entity ;
 
                                     }
                                     
@@ -272,15 +283,18 @@ Debug.DrawLine ( f3_pathNodePosition, f3_endPoint, Color.grey, 2 ) ;
                                 // Closest hit is found.
                                 if ( closestEntity.Index == targetPathNode.Index )
                                 {
-Debug.DrawLine ( f3_pathNodePosition, f3_closestPosition, Color.green, 5 ) ; // Length of ray, until hit collider.
+                                    
+                                    float3 f3_hitNodePosition = a_position [closestEntity].Value ;
 
-                                    a_pathNodeLinks.Add ( new PathNodeLinksBuffer () { f3 = f3_closestPosition, f_distance = math.sqrt ( f_closestHitDistance ), entity = closestEntity } ) ;
+Debug.DrawLine ( f3_pathNodePosition, f3_hitNodePosition, Color.green, 5 ) ; // Length of ray, until hit collider.
+
+                                    a_pathNodeLinks.Add ( new PathNodeLinksBuffer () { f3 = f3_hitNodePosition, f_distance = f_closestHitDistance, entity = closestEntity } ) ;
 
 // Debug.Log ( "closest hit: " + f3_closestPosition + "; distance: " + f_closestHitDistance + "; entity: " + closestEntity ) ;
                                 }
                                 else if ( closestEntity.Index > 0 )
                                 {
-Debug.DrawLine ( f3_pathNodePosition, f3_closestPosition, Color.red, 3 ) ; // Length of ray, until hit collider.
+Debug.DrawLine ( f3_pathNodePosition, f3_closestNodePositionDebug, Color.red, 3 ) ; // Length of ray, until hit collider.
                                 }
 
                             }

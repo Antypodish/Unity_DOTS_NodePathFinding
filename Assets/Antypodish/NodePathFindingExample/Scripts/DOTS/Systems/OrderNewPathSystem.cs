@@ -62,6 +62,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
             (
                 typeof ( IsAliveTag ),
                 typeof ( PathPlannerComponent ),
+                typeof ( PathPlannerWeightsMaskComponent ),
                 typeof ( PathNodesBuffer ),
                 
                 typeof ( Prefab )
@@ -71,7 +72,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
             {
                 Entity pathPlannerPrefabEntity = EntityManager.CreateEntity ( entityArchetype ) ;
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannar" ) ;
-                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 100, Allocator.Temp ) ;
+                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 1, Allocator.Temp ) ;
                 na_pathPLannerEntities.Dispose () ;
             
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannarPrefab" ) ;
