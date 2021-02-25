@@ -78,7 +78,8 @@ namespace Antypodish.NodePathFinding.DOTS
 
         protected override void OnDestroy ( )
         {
-            nhm_entityIndex.Dispose () ;
+            if ( nhm_entityIndex.IsCreated )
+                nhm_entityIndex.Dispose () ;
         }
 
         protected override void OnUpdate ( )
