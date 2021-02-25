@@ -71,7 +71,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
             {
                 Entity pathPlannerPrefabEntity = EntityManager.CreateEntity ( entityArchetype ) ;
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannar" ) ;
-                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 10000, Allocator.Temp ) ;
+                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 100, Allocator.Temp ) ;
                 na_pathPLannerEntities.Dispose () ;
             
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannarPrefab" ) ;
