@@ -279,6 +279,7 @@ namespace Antypodish.NodePathFinding.DOTS
 
             LastBestPath lastBestPath                               = new LastBestPath () { isBetterPathFound = false, f_weight = math.INFINITY } ;
 
+// int i_debugStop = 15 ;
 
             // Lookup link nodes.
             while ( canLookupLinkNodes )
@@ -290,12 +291,12 @@ namespace Antypodish.NodePathFinding.DOTS
 
                 if ( !alternateLastVisitedPathNodes )
                 {
-                    _LooUpNextLayer ( ref na_netNodesBestDistance2Node, ref na_isNetNodesAlreadyVisited, ref na_previouslyVisitedByNodeIndex, ref na_lastVisitedPathNodesA, ref i_lastVisitedPathNodesAIndex, ref na_lastVisitedPathNodesB, ref i_lastVisitedPathNodesBIndex, ref foundShortestPath, ref lastBestPath, in pathPlannerWeightsMask, in nhm_entityIndex, in pathNodeLinksBuffer, in pathNodesMaskWeightsBuffer, in a_pathNodesPosition, targetNodeEntity ) ;
+                    _LooUpNextLayer ( ref na_netNodesBestDistance2Node, ref na_isNetNodesAlreadyVisited, ref na_previouslyVisitedByNodeIndex, ref na_lastVisitedPathNodesA, ref i_lastVisitedPathNodesAIndex, ref na_lastVisitedPathNodesB, ref i_lastVisitedPathNodesBIndex, ref foundShortestPath, ref lastBestPath, in pathPlannerWeightsMask, in nhm_entityIndex, in pathNodeLinksBuffer, in pathNodesMaskWeightsBuffer, in a_pathNodesPosition, startingNodeEntity, targetNodeEntity ) ;
                     i_lastVisitedPathNodesTargetIndex = i_lastVisitedPathNodesBIndex ;
                 }
                 else
                 {
-                    _LooUpNextLayer ( ref na_netNodesBestDistance2Node, ref na_isNetNodesAlreadyVisited, ref na_previouslyVisitedByNodeIndex, ref na_lastVisitedPathNodesB, ref i_lastVisitedPathNodesBIndex, ref na_lastVisitedPathNodesA, ref i_lastVisitedPathNodesAIndex, ref foundShortestPath, ref lastBestPath, in pathPlannerWeightsMask, in nhm_entityIndex, in pathNodeLinksBuffer, in pathNodesMaskWeightsBuffer, in a_pathNodesPosition, targetNodeEntity ) ;
+                    _LooUpNextLayer ( ref na_netNodesBestDistance2Node, ref na_isNetNodesAlreadyVisited, ref na_previouslyVisitedByNodeIndex, ref na_lastVisitedPathNodesB, ref i_lastVisitedPathNodesBIndex, ref na_lastVisitedPathNodesA, ref i_lastVisitedPathNodesAIndex, ref foundShortestPath, ref lastBestPath, in pathPlannerWeightsMask, in nhm_entityIndex, in pathNodeLinksBuffer, in pathNodesMaskWeightsBuffer, in a_pathNodesPosition, startingNodeEntity, targetNodeEntity ) ;
                     i_lastVisitedPathNodesTargetIndex = i_lastVisitedPathNodesAIndex ;
                 }
 
@@ -304,12 +305,17 @@ namespace Antypodish.NodePathFinding.DOTS
 
                 canLookupLinkNodes = !lastBestPath.isBetterPathFound && i_lastVisitedPathNodesTargetIndex > 0 ;
 
+// i_debugStop -- ;
+// if ( i_debugStop <= 0 ) { Debug.LogError ( "too much 1." ) ; return ; } ;
+
             } // while
 
 
             
             nhm_entityIndex.TryGetValue ( targetNodeEntity, out int i_targetNodeIndex ) ;
-            
+   
+// Debug.LogError ( "Get path!" ) ;          
+
             // Get path.
             if ( foundShortestPath )
             {
@@ -317,21 +323,25 @@ namespace Antypodish.NodePathFinding.DOTS
                 int i_previousNodeIndex = i_targetNodeIndex ;
 
                 float3 f3_previousPosition = 0 ;
-
+// i_debugStop = 15 ;
                 while ( na_previouslyVisitedByNodeIndex [i_previousNodeIndex] >= 0 )
                 {
                     
                     Entity currentNodeEnity = na_netNodes [i_previousNodeIndex] ;
 
+// Debug.Log ( i_debugStop + "; prev index: " + i_previousNodeIndex + "; next index: " + na_previouslyVisitedByNodeIndex [i_previousNodeIndex] + "; current pos: " + a_pathNodesPosition [currentNodeEnity].Value + "; prev pos: " +  a_pathNodesPosition [na_netNodes [na_previouslyVisitedByNodeIndex [i_previousNodeIndex]]] ) ;       
                     i_previousNodeIndex = na_previouslyVisitedByNodeIndex [i_previousNodeIndex] ;
 
                     Entity previousNodeEnity = na_netNodes [i_previousNodeIndex] ;
 
                     float3 f3_currentPosition  = a_pathNodesPosition [currentNodeEnity].Value ;
                     f3_previousPosition        = a_pathNodesPosition [previousNodeEnity].Value ;
-Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
-                    
+Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 6 ) ;
+// Debug.Log ( i_debugStop + "; prev index: " + i_previousNodeIndex ) ;                    
                     a_pathNodes.Add ( new PathNodesBuffer () { f3_position = f3_currentPosition } ) ;
+
+// i_debugStop -- ;
+// if ( i_debugStop <= 0 ) { Debug.LogError ( "too much 2." ) ; return ; } ;
 
                 }
 
@@ -342,7 +352,7 @@ Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
         }
 
 
-        static private void _LooUpNextLayer ( ref NativeArray <float> na_netNodesBestDistance2Node, ref NativeArray <bool> na_isNetNodesAlreadyVisited, ref NativeArray <int> na_previouslyVisitedByNodeIndex, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesSource, ref int i_lastVisitedPathNodesSourceIndex, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesTarget, ref int i_lastVisitedPathNodesTargetIndex, ref bool foundShortestPath, ref LastBestPath lastBestPath, in PathPlannerWeightsMaskComponent pathPlannerWeightsMask, in NativeHashMap <Entity, int> nhm_entityIndex, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in BufferFromEntity <PathNodeMaskWeightsBuffer> pathNodesMaskWeightsBuffer, in ComponentDataFromEntity <Translation> a_posDebug, Entity targetNodeEntity )
+        static private void _LooUpNextLayer ( ref NativeArray <float> na_netNodesBestDistance2Node, ref NativeArray <bool> na_isNetNodesAlreadyVisited, ref NativeArray <int> na_previouslyVisitedByNodeIndex, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesSource, ref int i_lastVisitedPathNodesSourceIndex, ref NativeArray <LastVisitedPathNodes> na_lastVisitedPathNodesTarget, ref int i_lastVisitedPathNodesTargetIndex, ref bool foundShortestPath, ref LastBestPath lastBestPath, in PathPlannerWeightsMaskComponent pathPlannerWeightsMask, in NativeHashMap <Entity, int> nhm_entityIndex, in BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer, in BufferFromEntity <PathNodeMaskWeightsBuffer> pathNodesMaskWeightsBuffer, in ComponentDataFromEntity <Translation> a_posDebug, Entity startingNodeEntity, Entity targetNodeEntity )
         {
 
             i_lastVisitedPathNodesTargetIndex = 0 ; // Reset.
@@ -376,7 +386,9 @@ Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
 
                 DynamicBuffer <PathNodeLinksBuffer> a_pathNodeLinks = pathNodeLinksBuffer [lastVisitedPathNodes.entity] ;
 
-                bool isThisTargetNodeWithShortestPath = foundShortestPath && lastVisitedPathNodes.entity.Index == targetNodeEntity.Index ? true : false ;
+                bool isThisStartingNode                             = lastVisitedPathNodes.entity.Index == startingNodeEntity.Index ;
+                bool isThisTargetNode                               = lastVisitedPathNodes.entity.Index == targetNodeEntity.Index ;
+                bool isThisTargetNodeWithShortestPath               = foundShortestPath && isThisTargetNode ? true : false ;
                 
 float3 f3_currentNodePos = a_posDebug [lastVisitedPathNodes.entity].Value ;
 // Debug.LogWarning ( ">> >>> " + i + " / " + i_lastVisitedPathNodesSourceIndex + "; " + a_pathNodeLinks.Length ) ;
@@ -396,11 +408,16 @@ float3 f3_currentNodePos = a_posDebug [lastVisitedPathNodes.entity].Value ;
                     nhm_entityIndex.TryGetValue ( nextNodeEntity, out int i_nextNodeIndex ) ;
  
                     bool isNodeAlreadyVisited = na_isNetNodesAlreadyVisited [i_nextNodeIndex] ;
-                    
+
+                    bool isAtStartingNode     = nextNodeEntity.Index == startingNodeEntity.Index ;
+
+                    if ( isAtStartingNode ) continue ;
+
                     bool isAtTargetNode       = nextNodeEntity.Index == targetNodeEntity.Index ;
                     
 // Debug.LogWarning ( "** " + j + " / " + a_pathNodeLinks.Length + "; " + isNodeAlreadyVisited + " & " + isAtTargetNode ) ;
-                    if ( isNodeAlreadyVisited && !isAtTargetNode ) continue ;
+                    
+                    // if ( isNodeAlreadyVisited && !isAtTargetNode ) continue ;
 
 float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
  
@@ -420,31 +437,35 @@ float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
 
                         for ( int i_maskIndex = 0; i_maskIndex < a_pathNodesMaskWeights.Length; i_maskIndex ++ )
                         { 
-                            int i_weightIndex = pathPlannerWeightsMask.i_mask & ( 1 << i_maskIndex ) ;
-// Debug.LogError ( i_weightIndex + "; " + pathPlannerWeightsMask.i_mask + "; " + i_maskIndex + "; " + ( 1 << i_maskIndex ) ) ;
+                            int i_weightIndex = 1 << ( pathPlannerWeightsMask.i_mask - 1 ) & ( 1 << i_maskIndex ) ;
+// Debug.Log ( i_maskIndex + "; Mask weight index: " + i_weightIndex + "; " + ( pathPlannerWeightsMask.i_mask - 1) + "; " + i_maskIndex + "; " + ( 1 << i_maskIndex ) ) ;
 
                             if ( i_weightIndex == 0 ) continue ;
 
-                            f_weight2NextNode += a_pathNodesMaskWeights [i_weightIndex - 1].f_weight ;
+                            f_weight2NextNode += a_pathNodesMaskWeights [i_maskIndex].f_weight ;
 
                         } // for
 
                     }
+                    
+                    bool isBetterWeight = f_weight2NextNode < na_netNodesBestDistance2Node [i_nextNodeIndex] ;
 
-                    bool isPathImproved = false ;
+                    if ( isNodeAlreadyVisited && !isAtTargetNode && !isBetterWeight ) continue ;
+
+                    bool isFullPathImproved = false ;
 
                     if ( isAtTargetNode )
                     {
-// Debug.LogWarning ( "at target" ) ;                        
-// Debug.DrawLine ( f3_currentNodePos, f3_currentNodePos + math.normalize ( f3_nextNodePos - f3_currentNodePos ) * math.length ( f3_nextNodePos - f3_currentNodePos ) * 0.7f, Color.blue, 4 ) ; 
+// Debug.Log ( "at target" ) ;                        
+// Debug.DrawLine ( f3_currentNodePos, f3_currentNodePos + math.normalize ( f3_nextNodePos - f3_currentNodePos ) * math.length ( f3_nextNodePos - f3_currentNodePos ) * 0.7f, Color.blue, 8 ) ; 
                         if ( f_weight2NextNode <= lastBestPath.f_weight )
                         {
+// Debug.LogWarning ( "target path is improved: " + f_weight2NextNode + " >> " + lastBestPath.f_weight + "; from " + f3_currentNodePos  ) ;   
                             foundShortestPath     = true ;
-                            isPathImproved        = true ;
+                            isFullPathImproved    = true ;
                             lastBestPath.f_weight = f_weight2NextNode ;
-                            
-// Debug.Log ( "target path is improved." ) ;            
-// Debug.DrawLine ( f3_currentNodePos, f3_currentNodePos + math.normalize ( f3_nextNodePos - f3_currentNodePos ) * math.length ( f3_nextNodePos - f3_currentNodePos ) * 0.5f, Color.green, 5 ) ; 
+                                     
+// Debug.DrawLine ( f3_currentNodePos, f3_currentNodePos + math.normalize ( f3_nextNodePos - f3_currentNodePos ) * math.length ( f3_nextNodePos - f3_currentNodePos ) * 0.7f, Color.magenta, 7 ) ; 
                         }
                         
                     }
@@ -453,26 +474,43 @@ float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
                     {
                         canLookForAnotherBestPath |= !isNodeAlreadyVisited ;
 
-
                         // Do not allow to follw path from target node.
-                        // Only path to node is allowed.
+                        // Only path to target node is allowed.
                         if ( canLookForAnotherBestPath ) continue ; // Skip this node.
                     }
                     
-                    bool isBetterWeight = f_weight2NextNode <= na_netNodesBestDistance2Node [i_nextNodeIndex] ;
+                    if ( isThisTargetNode ) continue ;
 
 // if ( isAtTargetNode ) Debug.Log ( isAtTargetNode + "; " + ( !isNodeAlreadyVisited ) + "; " + isBetterWeight + "; next wiethg: " + f_weight2NextNode + "; current weight: " + na_netNodesBestDistance2Node [i_nextNodeIndex] + "; target entity: " + targetNodeEntity + "; current e: " + lastVisitedPathNodes.entity + "; next e: " + nextNodeEntity + "; current pos: " + f3_currentNodePos + "; next pos: " + f3_nextNodePos ) ;
 
+// Debug.Log (  "** " + j + " / " + a_pathNodeLinks.Length + "; is visited already: " + isNodeAlreadyVisited + "; is at target: " + isAtTargetNode + "; Moving to next: " + lastVisitedPathNodes.entity + " >> " + nextNodeEntity + "; weight: " + na_netNodesBestDistance2Node [i_nextNodeIndex] + " << " + f_weight2NextNode + " = " +  f_weight2ThisNode + " + " + f_nextNodeDistance + "; current e: " + lastVisitedPathNodes.entity + "; next e: " + nextNodeEntity + "; current pos: " + f3_currentNodePos + "; next pos: " + f3_nextNodePos ) ;
+// if ( isNodeAlreadyVisited && isBetterWeight ) Debug.Log ( "<< Path already visited and is better: " + lastVisitedPathNodes.entity + " >> " + nextNodeEntity ) ;
+
+                    if ( !isFullPathImproved && isNodeAlreadyVisited && isBetterWeight )
+                    {
+                        // Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.yellow, 9 ) ; 
+                        // Debug.Log ( "Other node improved" ) ;
+
+                        na_netNodesBestDistance2Node [i_nextNodeIndex]                    = f_weight2NextNode ;
+
+                        na_previouslyVisitedByNodeIndex [i_nextNodeIndex]                 = i_nodeIndex ;
+
+                        na_lastVisitedPathNodesTarget [i_lastVisitedPathNodesTargetIndex] = new LastVisitedPathNodes () { i_index = i_nextNodeIndex, entity = nextNodeEntity, f_weight = f_weight2NextNode } ;
+                        i_lastVisitedPathNodesTargetIndex ++ ;
+
+                    }
+                    else 
                     // Getting better distance to next node.
                     // If node is already not visited.
-                    if ( ( isPathImproved || !isNodeAlreadyVisited ) && isBetterWeight )
+                    // if ( isFullPathImproved || isBetterWeight ) 
+                    if ( ( isFullPathImproved || !isNodeAlreadyVisited ) && isBetterWeight )
                     {
 // Debug.Log ( "Draw white path from: " + f3_currentNodePos + " to; " + f3_nextNodePos ) ;
 Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.white, 2 ) ; 
 
-                        na_netNodesBestDistance2Node [i_nextNodeIndex] = f_weight2NextNode ;
+                        na_netNodesBestDistance2Node [i_nextNodeIndex]                    = f_weight2NextNode ;
 
-                        na_previouslyVisitedByNodeIndex [i_nextNodeIndex] = i_nodeIndex ;
+                        na_previouslyVisitedByNodeIndex [i_nextNodeIndex]                 = i_nodeIndex ;
 
                         na_lastVisitedPathNodesTarget [i_lastVisitedPathNodesTargetIndex] = new LastVisitedPathNodes () { i_index = i_nextNodeIndex, entity = nextNodeEntity, f_weight = f_weight2NextNode } ;
                         i_lastVisitedPathNodesTargetIndex ++ ;

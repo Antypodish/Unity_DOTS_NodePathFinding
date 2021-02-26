@@ -82,9 +82,10 @@ namespace Antypodish.NodePathFindingExample.DOTS
 
                 if ( na_pathPLannerEntities.Length > 1 ) 
                 {
-                    EntityManager.SetComponentData ( na_pathPLannerEntities [0], new PathPlannerWeightsMaskComponent () { i_mask = 1 } ) ;
-                    EntityManager.SetComponentData ( na_pathPLannerEntities [1], new PathPlannerWeightsMaskComponent () { i_mask = 2 } ) ;
-                    EntityManager.SetComponentData ( na_pathPLannerEntities [1], new PathPlannerWeightsMaskComponent () { i_mask = 3 } ) ;
+                    int i_index = 0 ;
+                    EntityManager.SetComponentData ( na_pathPLannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 1 } ) ;
+                    EntityManager.SetComponentData ( na_pathPLannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 2 } ) ;
+                    EntityManager.SetComponentData ( na_pathPLannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 3 } ) ;
                 }
 
                 na_pathPLannerEntities.Dispose () ;
