@@ -62,6 +62,21 @@ Green lines mark best possible route.
 More will come soon.
 
 
+## Editor Mode Gizmos Debugging (Weights and Mask)
+
+When node is selected in editor mode, it will display path node range (green wired sphere).
+If range is negative (sphere is small), every node will be tested on the same elevation.
+Otherwise, nodes within a range on same elevation will be checked.
+Target nodes render white wired gizmos.
+Rays link from source to target nodes are purple and always reach target node.
+Cyan ray links are from target to source. Their length is distance, or range (if smaller than distance) to source node.
+
+![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_17-24-28-png.803852/)
+
+Atm different debugging links and gizmos are not functional in edit mode, for changing elevation.
+Collision are also not tested in edit mode, to validate path.
+
+
 ## Support
 
 If you appricate my work, please star my repo. Many thanks :)
