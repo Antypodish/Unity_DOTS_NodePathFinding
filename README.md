@@ -48,6 +48,8 @@ Green lines mark best possible route.
 
 * ~~ (Weights and Mask) ~~ If weights with mask are set and its buffer size is greater than 0, path planner entity will be testing own mask, against each node mask. With middle mouse click can cycle through path planners, which each can have optionally own weigh mask set. Cycling starts from -1, which means, each entity will be executing path finding. Otherwise, each individual entity will be executing path finding. See console for details.
 
+![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_6-50-29-png.803495/)
+
 
 ## Controls
 
