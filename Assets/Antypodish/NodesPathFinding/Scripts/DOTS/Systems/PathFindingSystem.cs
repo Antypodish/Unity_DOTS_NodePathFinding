@@ -85,7 +85,7 @@ namespace Antypodish.NodePathFinding.DOTS
 
         protected override void OnUpdate ( )
         {
-            Debug.LogError ( "@ " + ( 1 << 3 ) + "; " + ( 4 >> 1 ) ) ;
+
             NativeArray <Entity> na_netNodes = group_netNodes.ToEntityArray ( Allocator.TempJob ) ;
 
             if ( !isSystemInitialized )
@@ -204,7 +204,6 @@ namespace Antypodish.NodePathFinding.DOTS
             public void Execute ( ArchetypeChunk batchInChunk, int batchIndex )
             { 
 
-                
                 na_netNodesBestDistance2Node    = new NativeArray <float> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 na_isNetNodesAlreadyVisited     = new NativeArray <bool> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
                 na_previouslyVisitedByNodeIndex = new NativeArray <int> ( na_netNodes.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
@@ -228,7 +227,7 @@ namespace Antypodish.NodePathFinding.DOTS
 
                     // pathPlannerWeightsMask.i_mask
 
-                    // Ignore same start and ending point.
+                    // Ignore same start and ending point situation.
                     if ( pathPlanner.entityA.Index == pathPlanner.entityB.Index ) continue ; 
 
                     DynamicBuffer <PathNodesBuffer> a_pathNodes = pathNodesBuffer [i] ;
@@ -365,7 +364,7 @@ Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
             */
 
             bool canLookForAnotherBestPath = false ;
-
+            
             for ( int i = 0; i < i_lastVisitedPathNodesSourceIndex; i ++ )
             {
 
@@ -380,6 +379,7 @@ Debug.DrawLine ( f3_currentPosition, f3_previousPosition, Color.green, 7 ) ;
                 bool isThisTargetNodeWithShortestPath = foundShortestPath && lastVisitedPathNodes.entity.Index == targetNodeEntity.Index ? true : false ;
                 
 float3 f3_currentNodePos = a_posDebug [lastVisitedPathNodes.entity].Value ;
+// Debug.LogWarning ( ">> >>> " + i + " / " + i_lastVisitedPathNodesSourceIndex + "; " + a_pathNodeLinks.Length ) ;
 
                 // Visit next linked nodes.
                 for ( int j = 0; j < a_pathNodeLinks.Length; j ++ )
@@ -397,8 +397,9 @@ float3 f3_currentNodePos = a_posDebug [lastVisitedPathNodes.entity].Value ;
  
                     bool isNodeAlreadyVisited = na_isNetNodesAlreadyVisited [i_nextNodeIndex] ;
                     
-                    bool isAtTargetNode = nextNodeEntity.Index == targetNodeEntity.Index ;
-
+                    bool isAtTargetNode       = nextNodeEntity.Index == targetNodeEntity.Index ;
+                    
+// Debug.LogWarning ( "** " + j + " / " + a_pathNodeLinks.Length + "; " + isNodeAlreadyVisited + " & " + isAtTargetNode ) ;
                     if ( isNodeAlreadyVisited && !isAtTargetNode ) continue ;
 
 float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
@@ -409,12 +410,25 @@ float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
                     
                     DynamicBuffer <PathNodeMaskWeightsBuffer> a_pathNodesMaskWeights = pathNodesMaskWeightsBuffer [nextNodeEntity] ;
 
+                    
+                    // Grab node weights, based on the path planner mask.
 // Debug.LogWarning ( ">> " + j + " / " + a_pathNodeLinks.Length + string.Format ( "; current weight: " + f_weight2NextNode + " = " + f_weight2ThisNode + " + next: " + f_nextNodeDistance + "; current e: " + lastVisitedPathNodes.entity + "; next e: " + nextNodeEntity + "; current pos: " + f3_currentNodePos + "; next pos: " + f3_nextNodePos) ) ;
                     if ( a_pathNodesMaskWeights.Length > 0 )
                     {
 // Debug.Log ( j + " / " + a_pathNodeLinks.Length + "; src: " + lastVisitedPathNodes.entity + "; to: " + nextNodeEntity ) ;
 // Debug.LogWarning ( "** extra weight: " + a_pathNodesMaskWeights [0].f_weight ) ;
-                        f_weight2NextNode += a_pathNodesMaskWeights [0].f_weight ;
+
+                        for ( int i_maskIndex = 0; i_maskIndex < a_pathNodesMaskWeights.Length; i_maskIndex ++ )
+                        { 
+                            int i_weightIndex = pathPlannerWeightsMask.i_mask & ( 1 << i_maskIndex ) ;
+// Debug.LogError ( i_weightIndex + "; " + pathPlannerWeightsMask.i_mask + "; " + i_maskIndex + "; " + ( 1 << i_maskIndex ) ) ;
+
+                            if ( i_weightIndex == 0 ) continue ;
+
+                            f_weight2NextNode += a_pathNodesMaskWeights [i_weightIndex - 1].f_weight ;
+
+                        } // for
+
                     }
 
                     bool isPathImproved = false ;

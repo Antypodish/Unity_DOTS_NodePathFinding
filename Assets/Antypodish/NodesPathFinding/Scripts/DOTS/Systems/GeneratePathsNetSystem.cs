@@ -217,7 +217,7 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
                         PathNodeLinkRangeComponent pathNodeLinkRange        = a_pathNodeLinkRange [pathNodeEntity] ;
 
                         // If max range is less than 0, then any range is acceptable.
-                        float f_maxRange                                    = pathNodeLinkRange.f_maxRange < 0 ? math.INFINITY : pathNodeLinkRange.f_maxRange ;
+                        float f_maxRange                                    = pathNodeLinkRange.f_maxRange ; // < 0 ? math.INFINITY : pathNodeLinkRange.f_maxRange ;
 
                         // Lookup for linked near nodes on a given level.
                         for ( int k = 0; k < i_pathNodeIndex; k ++ )
@@ -229,7 +229,7 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
                             var raycastInput = new RaycastInput
                             {
                                 Start  = f3_pathNodePosition,
-                                End    = f3_endPoint,
+                                End    = f_maxRange < 0 ? f3_endPoint : f3_pathNodePosition + math.normalize ( f3_endPoint - f3_pathNodePosition ) * f_maxRange,
                                 Filter = CollisionFilter.Default
                             } ;
                     
@@ -266,7 +266,7 @@ Debug.DrawLine ( f3_pathNodePosition, f3_endPoint, Color.grey, 2 ) ;
 
                                     
 
-                                    if ( f_distance > 1 && f_distance <= f_closestHitDistance && f_distance < f_maxRange )
+                                    if ( f_distance > 1 && f_distance <= f_closestHitDistance ) // && f_distance < f_maxRange )
                                     {
                                         // Debug.Log ( "Closest hit: " + hit.point + "; at distance: " + hit.distance ) ;
                                         // closestHit = hit ;

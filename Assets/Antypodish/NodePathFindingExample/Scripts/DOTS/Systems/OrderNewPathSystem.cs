@@ -28,6 +28,10 @@ namespace Antypodish.NodePathFindingExample.DOTS
 
         EntityQuery group_pathPlanners ;
 
+        int i_pathPlannerIndex = -1 ;
+        int i_pathPlannerEnttiyIndex = -1 ;
+        NativeArray <Entity> na_pathPlannersExample ;
+
         /// <summary>
         /// Path finding will alternate between last visited buffer, to find next linked nodes.
         /// </summary>
@@ -70,12 +74,24 @@ namespace Antypodish.NodePathFindingExample.DOTS
 
             // Example 
             {
+                i_pathPlannerIndex = -1 ;
+
                 Entity pathPlannerPrefabEntity = EntityManager.CreateEntity ( entityArchetype ) ;
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannar" ) ;
-                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 1, Allocator.Temp ) ;
+                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 3, Allocator.Temp ) ;
+
+                if ( na_pathPLannerEntities.Length > 1 ) 
+                {
+                    EntityManager.SetComponentData ( na_pathPLannerEntities [0], new PathPlannerWeightsMaskComponent () { i_mask = 1 } ) ;
+                    EntityManager.SetComponentData ( na_pathPLannerEntities [1], new PathPlannerWeightsMaskComponent () { i_mask = 2 } ) ;
+                    EntityManager.SetComponentData ( na_pathPLannerEntities [1], new PathPlannerWeightsMaskComponent () { i_mask = 3 } ) ;
+                }
+
                 na_pathPLannerEntities.Dispose () ;
             
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannarPrefab" ) ;
+
+                na_pathPlannersExample = group_pathPlanners.ToEntityArray ( Allocator.TempJob ) ;
             }
 
         }
@@ -86,6 +102,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
 
         protected override void OnDestroy ( )
         {
+            na_pathPlannersExample.Dispose () ;
         }
 
         protected override void OnUpdate ( )
@@ -125,10 +142,35 @@ Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 2
                     
             var collector = new IgnoreTransparentClosestHitCollector ( collisionWorld ) ;
 
+            
+            if ( Input.GetMouseButtonUp ( 2 ) ) // Middle click.
+            {
+                    
+                // NativeArray <Entity> na_pathPlanners = group_pathPlanners.ToEntityArray ( Allocator.TempJob ) ;
+
+                if ( i_pathPlannerIndex >= na_pathPlannersExample.Length - 1 ) 
+                {
+                    i_pathPlannerIndex       = -1 ;
+                    i_pathPlannerEnttiyIndex = -1 ;
+                    Debug.Log ( "Each path planner will be used for path planning." ) ;
+                }
+                else
+                {
+                    i_pathPlannerIndex ++ ;
+
+                    Entity pathPlannerEntity = na_pathPlannersExample [i_pathPlannerIndex] ;
+                    i_pathPlannerEnttiyIndex = pathPlannerEntity.Index ;
+                    Debug.Log ( string.Format ( "Path planner {0} ({1}) will be used for path planning.", i_pathPlannerIndex, pathPlannerEntity ) ) ;
+                }
+
+                // na_pathPlanners.Dispose () ;
+            }
+
+
             if ( collisionWorld.CastRay ( raycastInput, ref collector ) )
             {
 
-                if ( Input.GetMouseButtonUp ( 0 ) || Input.GetMouseButtonUp ( 1 ) )
+                if ( Input.GetMouseButtonUp ( 0 ) || Input.GetMouseButtonUp ( 1 ) ) // Left, right click.
                 {
    
 Debug.Log ( "Hits: " + collector.ClosestHit.Entity + " @ pos: " + collector.ClosestHit.Position ) ;
@@ -175,12 +217,20 @@ Debug.Log ( "Hits: " + collector.ClosestHit.Entity + " @ pos: " + collector.Clos
 
 Debug.Log ( "Start entity: " + pathPlanner.entityA + " target entity: " + pathPlanner.entityB ) ;
                         
+                        int i_entityInQueryIndexTemp = i_pathPlannerEnttiyIndex ;
+
                         Entities
                             .WithName ( "OrderPathSearchJob" )
                             .WithAll <IsAliveTag, PathPlannerComponent> ()
                             .ForEach ( ( Entity entity, int entityInQueryIndex ) => 
                         { 
-                            ecbp.AddComponent <CanFindPathTag> ( entityInQueryIndex, entity ) ;
+                            
+                            // Define, which path planners are used, for path planning.
+                            if ( i_entityInQueryIndexTemp == entity.Index || i_entityInQueryIndexTemp < 0 )
+                            {
+                                ecbp.AddComponent <CanFindPathTag> ( entityInQueryIndex, entity ) ;
+                            }
+
                         }).Schedule () ;
 
                         becb.AddJobHandleForProducer ( Dependency ) ;
