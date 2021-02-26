@@ -440,8 +440,8 @@ float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
 
                         for ( int i_maskIndex = 0; i_maskIndex < a_pathNodesMaskWeights.Length; i_maskIndex ++ )
                         { 
-                            int i_weightIndex = 1 << ( pathPlannerWeightsMask.i_mask ) & ( 1 << i_maskIndex ) ;
-// Debug.Log ( i_maskIndex + "; Mask weight index: " + i_weightIndex + "; " + ( pathPlannerWeightsMask.i_mask - 1) + "; " + i_maskIndex + "; " + ( 1 << i_maskIndex ) ) ;
+                            int i_weightIndex = ( 1 << pathPlannerWeightsMask.i_mask ) & ( 1 << i_maskIndex ) ;
+// Debug.Log ( i_maskIndex + "; Mask weight index: " + i_weightIndex + "; " + ( pathPlannerWeightsMask.i_mask - 1 ) + "; " + i_maskIndex + "; " + ( 1 << i_maskIndex ) ) ;
 
                             if ( i_weightIndex == 0 || pathPlannerWeightsMask.i_mask == -1 ) continue ;
 

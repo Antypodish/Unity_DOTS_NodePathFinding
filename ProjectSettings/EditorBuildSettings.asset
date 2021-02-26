@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Antypodish/Scenes/Game.unity
+    path: Assets/Antypodish/Scenes/NodePathFinding_MaskWeights.unity
     guid: d452cbe6514f43c4fbd3d49db5cf96a2
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: f2398cd890ed9e147b76eb514ff8c5b2, type: 2}
