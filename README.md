@@ -1,4 +1,4 @@
-# Unity DOTS Node based Path Finding
+# Unity DOTS Node based Path Finding (Weights and Mask)
 
 Unity DOTS node based path finding, using Eager Dijkstra modified Shortest Path algorithm
 Please see Unity DOTS forum for discussions.
