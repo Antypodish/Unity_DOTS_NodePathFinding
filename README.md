@@ -15,7 +15,7 @@ These become static, as current system do not allow for changing this network at
 
 * ~~ (Weights and Mask) ~~ Optionally each node can have set range (PathNodeLinkRangeComponent), in which will detect other path nodes, and weights (difficulty) with mask (PathNodeMaskWeightsBuffer). See path node scene inspector for more details. If weighs are used, mask must be set accordingly in path planner entity (PathPlannerWeightsMaskComponent).
 
-![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_6-50-29-png.803495/)
+![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_7-9-31-png.803504/)
 
 Further path planner entities allow for searching best path.
 Setting are set for 100 entities by default, in OrderNewPathSystem.cs.
@@ -50,7 +50,7 @@ Green lines mark best possible route.
 
 * ~~ (Weights and Mask) ~~ If weights with mask are set and its buffer size is greater than 0, path planner entity will be testing own mask, against each node mask. With middle mouse click can cycle through path planners, which each can have optionally own weigh mask set. Cycling starts from -1, which means, each entity will be executing path finding. Otherwise, each individual entity will be executing path finding. See console for details.
 
-![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_6-59-17-png.803498/)
+![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_7-8-32-png.803501/)
 
 
 ## Controls
