@@ -46,7 +46,7 @@ Path Finding System job is executed once, and debugging rays are rendered.
 White lines indicate tested near routes. 
 Green lines mark best possible route.
 
-* ~~ (Weights and Mask) ~~ If weights with mask are set and its buffer size is greater than 0, path planner entity will be testing own mask, against each node mask. With middle mouse click can cycle through path planners, which each can have optionally own weigh mask set.
+* ~~ (Weights and Mask) ~~ If weights with mask are set and its buffer size is greater than 0, path planner entity will be testing own mask, against each node mask. With middle mouse click can cycle through path planners, which each can have optionally own weigh mask set. Cycling starts from -1, which means, each entity will be executing path finding. Otherwise, each individual entity will be executing path finding. See console for details.
 
 
 ## Controls
