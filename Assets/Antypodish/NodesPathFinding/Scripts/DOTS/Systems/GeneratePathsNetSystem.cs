@@ -8,6 +8,7 @@ using Unity.Burst ;
 using Unity.Entities ;
 using Unity.Transforms ;
 using Unity.Collections ;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics ;
 
 using Antypodish.DOTS ;
@@ -65,14 +66,17 @@ namespace Antypodish.NodePathFinding.DOTS
             
             ComponentDataFromEntity <Translation> a_position = GetComponentDataFromEntity <Translation> ( true ) ;
 
-            CollisionWorld collisionWorld = buildPhysicsWorld.PhysicsWorld.CollisionWorld ;
+            PhysicsWorld physicsWorld     = buildPhysicsWorld.PhysicsWorld ;
+            CollisionWorld collisionWorld = physicsWorld.CollisionWorld ;
             
+            /*
             CollisionFilter collisionFilter = default ;
             collisionFilter.CollidesWith = 1 << (int) CollisionFilters.ElevationNodes ; // Elevation Nodes.
             collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Floor ; // Floor.
             collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Walls ; // Walls.
             collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Ramps ; // Ramps.
             collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Other ; // Other. // Optional
+            */
 
             Entities.WithName ( "SetPathNodesEleveationEntityJob" )
                 .WithAll <PathNodeTag> ()
@@ -88,14 +92,15 @@ namespace Antypodish.NodePathFinding.DOTS
 
             Dependency = new AddPathLinksJob ()
             {
+                physicsWorld              = physicsWorld,
                 collisionWorld            = collisionWorld,
-                collisionFilter           = collisionFilter,
+                a_physicsCollider         = GetComponentDataFromEntity <PhysicsCollider> ( true ),
+                // collisionFilter           = collisionFilter,
                 nmhm_pathNodesByElevation = nmhm_pathNodesByElevation,
                 a_position                = a_position,
                 a_pathNodeLinkRange       = GetComponentDataFromEntity <PathNodeLinkRangeComponent> ( true ),
                 a_pathNodeElevationLink   = GetComponentDataFromEntity <PathNodeElevationLinkComponent> ( true ),
                 pathNodeLinksBuffer       = GetBufferFromEntity <PathNodeLinksBuffer> ( false )
-
 
             }.Schedule ( Dependency ) ;
 
@@ -143,10 +148,16 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
         {
 
             [ReadOnly]
+            public PhysicsWorld physicsWorld ;
+
+            [ReadOnly]
             public CollisionWorld collisionWorld ;
 
             [ReadOnly]
-            public CollisionFilter collisionFilter ;
+            public ComponentDataFromEntity <PhysicsCollider> a_physicsCollider ;
+
+            // [ReadOnly]
+            // public CollisionFilter collisionFilter ;
 
             [ReadOnly]
             public NativeMultiHashMap <float, Entity> nmhm_pathNodesByElevation ;
@@ -163,6 +174,12 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
             [NativeDisableParallelForRestriction]
             public BufferFromEntity <PathNodeLinksBuffer> pathNodeLinksBuffer ;
 
+            // Prevent memory allocation
+            [NativeDisableContainerSafetyRestriction] 
+            private NativeArray <CollisionFilter> na_collisionFilters ;
+
+            [NativeDisableContainerSafetyRestriction] 
+            NativeArray <Entity> na_pathNodeOnEleveation ;
             public void Execute ()
             {
                 
@@ -170,47 +187,68 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
 
                 na_elevationAsKeys.Sort () ;
 
-                int i_uniqueKeys = na_elevationAsKeys.Unique () ;
+                int i_elevationAsUniqueKeys = na_elevationAsKeys.Unique () ;
                 
-                NativeArray <Entity> na_pathNodeOnEleveation = new NativeArray<Entity> ( na_elevationAsKeys.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
+                na_pathNodeOnEleveation     = new NativeArray <Entity> ( na_elevationAsKeys.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
+                na_collisionFilters         = new NativeArray <CollisionFilter> ( na_elevationAsKeys.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory ) ;
 
-                for ( int i = 0; i < i_uniqueKeys; i ++ )
+                for ( int i_elevationIndex = 0; i_elevationIndex < i_elevationAsUniqueKeys; i_elevationIndex ++ )
                 {
 
-                    int i_pathNodeIndex = 0 ;
+                    int i_pathNodeCount = 0 ;
 
-                    float f_elevationAsKey = na_elevationAsKeys [i] ;
+                    float f_elevationAsKey = na_elevationAsKeys [i_elevationIndex] ;
 
                     Entity pathNodeEntity ;
                     NativeMultiHashMapIterator <float> it ;
 
+
                     // Iterate though nodes on given level.
                     if ( nmhm_pathNodesByElevation.TryGetFirstValue ( f_elevationAsKey, out pathNodeEntity, out it ) )
                     {
-                        na_pathNodeOnEleveation [i_pathNodeIndex] = pathNodeEntity ;
+                        na_pathNodeOnEleveation [i_pathNodeCount] = pathNodeEntity ;
+
+// Useful resources about physics collider.
+// https://docs.unity3d.com/Packages/com.unity.physics@0.5/manual/core_components.html#modifying-physicscollider
+// https://docs.unity3d.com/Packages/com.unity.physics@0.0/manual/collision_queries.html
+                        PhysicsCollider physicsCollider           = a_physicsCollider [pathNodeEntity] ;
+                        na_collisionFilters [i_elevationIndex]    = physicsCollider.Value.Value.Filter ;
+                        
+                    /*
+RigidBody rb                    = physicsWorld.Bodies [hit.RigidBodyIndex] ;
+CollisionFilter collisionFilter = rb.Collider.Value.Filter ;
+Entity e                        = rb.Entity ;
+                    
+                                var col = new Unity.Physics.Collider () ; 
+                                col.Filter
+                     */
+
  // Debug.Log ( i_uniqueKeys + "; New: " + pathNodeEntity ) ;
-                        i_pathNodeIndex ++ ;
+                        i_pathNodeCount ++ ;
 
                     }
+
                 
                     while ( nmhm_pathNodesByElevation.TryGetNextValue ( out pathNodeEntity, ref it ) )
                     {
-                        na_pathNodeOnEleveation [i_pathNodeIndex] = pathNodeEntity ;
+                        na_pathNodeOnEleveation [i_pathNodeCount] = pathNodeEntity ;
+
+                        PhysicsCollider physicsCollider           = a_physicsCollider [pathNodeEntity] ;
+                        na_collisionFilters [i_elevationIndex]    = physicsCollider.Value.Value.Filter ;
 
 // Debug.Log ( i_uniqueKeys + "; Next: " + pathNodeEntity ) ;
-                        i_pathNodeIndex ++ ;
+                        i_pathNodeCount ++ ;
                     }
 
-                    
-                    NativeList <Unity.Physics.RaycastHit> nl_allHits = new NativeList <Unity.Physics.RaycastHit> ( i_pathNodeIndex, Allocator.Temp ) ;
+                    NativeList <Unity.Physics.RaycastHit> nl_allHits = new NativeList <Unity.Physics.RaycastHit> ( i_pathNodeCount, Allocator.Temp ) ;
                     
                     
 
                     // Iterate though nodes on a given level.
-                    for ( int j = 0; j < i_pathNodeIndex; j ++ )
+                    for ( int i_pathNodeIndex = 0; i_pathNodeIndex < i_pathNodeCount; i_pathNodeIndex ++ )
                     {
 
-                        pathNodeEntity                                      = na_pathNodeOnEleveation [j] ;
+                        pathNodeEntity                                      = na_pathNodeOnEleveation [i_pathNodeIndex] ;
                         float3 f3_pathNodePosition                          = a_position [pathNodeEntity].Value ;
 
                         DynamicBuffer <PathNodeLinksBuffer> a_pathNodeLinks = pathNodeLinksBuffer [pathNodeEntity] ;
@@ -220,11 +258,12 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
                         float f_maxRange                                    = pathNodeLinkRange.f_maxRange ; // < 0 ? math.INFINITY : pathNodeLinkRange.f_maxRange ;
 
                         // Lookup for linked near nodes on a given level.
-                        for ( int k = 0; k < i_pathNodeIndex; k ++ )
+                        for ( int k = 0; k < i_pathNodeCount; k ++ )
                         {
 
-                            Entity targetPathNode = na_pathNodeOnEleveation [k] ;
-                            float3 f3_endPoint    = a_position [targetPathNode].Value ;
+                            Entity targetPathNode           = na_pathNodeOnEleveation [k] ;
+                            float3 f3_endPoint              = a_position [targetPathNode].Value ;
+
 
                             var raycastInput = new RaycastInput
                             {
@@ -233,9 +272,10 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
                                 Filter = CollisionFilter.Default
                             } ;
                     
-                            // raycastInput.Filter.CollidesWith = 2 ; // Scores layer.
-                            raycastInput.Filter.CollidesWith = collisionFilter.CollidesWith ; // Barriers layer.
-                    
+                            CollisionFilter collisionFilter  = na_collisionFilters [i_elevationIndex] ;
+                            raycastInput.Filter.CollidesWith = collisionFilter.BelongsTo ;
+                            // raycastInput.Filter.BelongsTo    = collisionFilter.BelongsTo ;
+
                             // var collector = new IgnoreTransparentClosestHitCollector ( collisionWorld ) ;
 
                             nl_allHits.Clear () ;
@@ -252,14 +292,12 @@ Debug.DrawLine ( f3_pathNodePosition, f3_endPoint, Color.grey, 2 ) ;
                                 float3 f3_closestNodePositionDebug  = 0 ;
                                 Entity closestEntity                = default ;
 
-                                
-
                                 // Get closest hit.
                                 for ( int l = 0; l < nl_allHits.Length; l ++ ) 
                                 {
-
                                     Unity.Physics.RaycastHit hit = nl_allHits [l] ;
-                                    
+
+                                   
                                     float3 f3_clostHitPosition = hit.Position ;
                                     float f_distance           = math.length ( f3_clostHitPosition - f3_pathNodePosition ) ;
                                     // Debug.Log ( "#" + k + "; f: " + f ) ;
