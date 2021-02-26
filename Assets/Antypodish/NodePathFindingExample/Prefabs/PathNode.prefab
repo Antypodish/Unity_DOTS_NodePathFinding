@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 6712860759344112617}
   - component: {fileID: 4443259202892341145}
   - component: {fileID: 5665729561873690764}
+  - component: {fileID: 3525608435256095780}
   - component: {fileID: 9134703250481038401}
   - component: {fileID: 6944771751959454833}
   - component: {fileID: 8484546781544526605}
@@ -167,6 +168,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   f_maxRange: -1
+--- !u!114 &3525608435256095780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6778744589707518115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49421cefbd459c5428c54538f2cbac4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BufferDescription: This is helper component, with help description for Path Node
+    Mask Weights Buffer Authoring script.
+  ElementsDescription: Mask Weights Buffer Authoring should take typically weights
+    float values in range 0 to infinity. However, negative value is also acceptable.
+    However, negative value is also acceptable.However, value above 100k, is conidered
+    as path barrier, with no path allowed.
+  BufferSizeDescription: 'Buffer size should be in range of 0 to 32, as each element
+    corresponds to different mask. Path Planner Entity should have PathPlannerWeightsMaskComponent,
+    with corresponding mask set. '
+  PathPlannerDescription: 'Path Planner Entity PathPlannerWeightsMaskComponent mask
+    examples: 0 size buffer, or mask set to -1, means no additional weight will be
+    used.Buffer size 1 and mask set to 0, will match and first buffer index weight
+    and its weight will be evaluated.Buffer size 2 and mask set to 1, will match
+    and second buffer index and its weight will be evaluated.Buffer size 3 and mask
+    set to 3, will match and first and second (not third) buffer indexes and its
+    weights will be evaluated.Buffer size 4 and mask set to 5, will match and first
+    and forth buffer indexes and its weights will be evaluated.Etc.'
 --- !u!114 &9134703250481038401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -179,7 +209,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2b3ebe64d3d1b1409c4dc4e7689a3e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Values: 
+  Values:
+  - 0
 --- !u!114 &6944771751959454833
 MonoBehaviour:
   m_ObjectHideFlags: 0

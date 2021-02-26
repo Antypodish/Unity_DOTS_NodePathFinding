@@ -5179,6 +5179,39 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3812132393004376837, guid: a68e771f15d3377469be2d9898e00001, type: 3}
   m_PrefabInstance: {fileID: 1780479526}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1780479528 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6778744589707518115, guid: a68e771f15d3377469be2d9898e00001, type: 3}
+  m_PrefabInstance: {fileID: 1780479526}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1780479529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1780479528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49421cefbd459c5428c54538f2cbac4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BufferDescription: This is helper component, with help description for Path Node
+    Mask Weights Buffer Authoring script.
+  ElementsDescription: Mask Weights Buffer Authoring should take typically weights
+    float values in range 0 to infinity. However, negative value is also acceptable.
+    0 = mask disabled.
+  BufferSizeDescription: 'Buffer size should be in range of 0 to 32, as each element
+    corresponds to different mask. Path Planner Entity should have PathPlannerWeightsMaskComponent,
+    with corresponding mask set. '
+  PathPlannerDescription: 'Path Planner Entity mask examples: 0 size buffer, or mask
+    set to -1, means no additional weight will be used.Buffer size 1 and mask set
+    to 0, will match and first buffer index weight and its weight will be evaluated.Buffer
+    size 2 and mask set to 1, will match and second buffer index and its weight will
+    be evaluated.Buffer size 3 and mask set to 3, will match and first and second
+    (not third) buffer indexes and its weights will be evaluated.Buffer size 4 and
+    mask set to 5, will match and first and forth buffer indexes and its weights
+    will be evaluated.Etc.'
 --- !u!850595691 &1848156388
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -5841,6 +5874,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 916365862}
     m_Modifications:
+    - target: {fileID: 747847931421032354, guid: a68e771f15d3377469be2d9898e00001, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 747847931421032354, guid: a68e771f15d3377469be2d9898e00001, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3812132393004376837, guid: a68e771f15d3377469be2d9898e00001, type: 3}
       propertyPath: m_LocalPosition.x
       value: -12.95

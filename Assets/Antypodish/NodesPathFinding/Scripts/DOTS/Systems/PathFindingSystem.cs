@@ -427,24 +427,38 @@ float3 f3_nextNodePos = a_posDebug [nextNodeEntity].Value ;
                     
                     DynamicBuffer <PathNodeMaskWeightsBuffer> a_pathNodesMaskWeights = pathNodesMaskWeightsBuffer [nextNodeEntity] ;
 
-                    
+
                     // Grab node weights, based on the path planner mask.
 // Debug.LogWarning ( ">> " + j + " / " + a_pathNodeLinks.Length + string.Format ( "; current weight: " + f_weight2NextNode + " = " + f_weight2ThisNode + " + next: " + f_nextNodeDistance + "; current e: " + lastVisitedPathNodes.entity + "; next e: " + nextNodeEntity + "; current pos: " + f3_currentNodePos + "; next pos: " + f3_nextNodePos) ) ;
                     if ( a_pathNodesMaskWeights.Length > 0 )
                     {
+                        
+                        bool isThisPathNodeOutOfReach = false ;
+
 // Debug.Log ( j + " / " + a_pathNodeLinks.Length + "; src: " + lastVisitedPathNodes.entity + "; to: " + nextNodeEntity ) ;
 // Debug.LogWarning ( "** extra weight: " + a_pathNodesMaskWeights [0].f_weight ) ;
 
                         for ( int i_maskIndex = 0; i_maskIndex < a_pathNodesMaskWeights.Length; i_maskIndex ++ )
                         { 
-                            int i_weightIndex = 1 << ( pathPlannerWeightsMask.i_mask - 1 ) & ( 1 << i_maskIndex ) ;
+                            int i_weightIndex = 1 << ( pathPlannerWeightsMask.i_mask ) & ( 1 << i_maskIndex ) ;
 // Debug.Log ( i_maskIndex + "; Mask weight index: " + i_weightIndex + "; " + ( pathPlannerWeightsMask.i_mask - 1) + "; " + i_maskIndex + "; " + ( 1 << i_maskIndex ) ) ;
 
-                            if ( i_weightIndex == 0 ) continue ;
+                            if ( i_weightIndex == 0 || pathPlannerWeightsMask.i_mask == -1 ) continue ;
 
-                            f_weight2NextNode += a_pathNodesMaskWeights [i_maskIndex].f_weight ;
+                            float f_weight = a_pathNodesMaskWeights [i_maskIndex].f_weight ;
+
+                            if ( f_weight >= 100000 ) 
+                            {
+                                isThisPathNodeOutOfReach = true ;
+                                continue ;
+                            }
+
+                            f_weight2NextNode += f_weight ;
 
                         } // for
+
+                        // If this path is not allowed.
+                        if ( isThisPathNodeOutOfReach ) continue ;
 
                     }
                     
