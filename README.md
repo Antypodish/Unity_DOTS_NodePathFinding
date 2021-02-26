@@ -15,7 +15,7 @@ These become static, as current system do not allow for changing this network at
 
 * ~~ (Weights and Mask) ~~ Optionally each node can have set range (PathNodeLinkRangeComponent), in which will detect other path nodes, and weights (difficulty) with mask (PathNodeMaskWeightsBuffer). See path node scene inspector for more details. If weighs are used, mask must be set accordingly in path planner entity (PathPlannerWeightsMaskComponent).
 
-![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_7-9-31-png.803504/)
+![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_17-24-28-png.803852/)
 
 Further path planner entities allow for searching best path.
 Setting are set for 100 entities by default, in OrderNewPathSystem.cs.
@@ -60,6 +60,21 @@ Green lines mark best possible route.
 * ~~ (Weights and Mask) ~~ Middle click, toggle through path planner entities. Be aware, in the example script, if there is a lot entities, it may take many clicks to cycle them through.
 
 More will come soon.
+
+
+## Editor Mode Gizmos Debugging (Weights and Mask)
+
+When node is selected in editor mode, it will display path node range (green wired sphere).
+If range is negative (sphere is small), every node will be tested on the same elevation.
+Otherwise, nodes within a range on same elevation will be checked.
+Target nodes render white wired gizmos.
+Rays link from source to target nodes are purple and always reach target node.
+Cyan ray links are from target to source. Their length is distance, or range (if smaller than distance) to source node.
+
+![Watch the video](https://forum.unity.com/attachments/upload_2021-2-26_17-24-28-png.803852/)
+
+Atm different debugging links and gizmos are not functional in edit mode, for changing elevation.
+Collision are also not tested in edit mode, to validate path.
 
 
 ## Support
