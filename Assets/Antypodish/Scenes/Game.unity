@@ -3140,6 +3140,10 @@ PrefabInstance:
       propertyPath: f_maxRange
       value: 27
       objectReference: {fileID: 0}
+    - target: {fileID: 4443259202892341145, guid: a68e771f15d3377469be2d9898e00001, type: 3}
+      propertyPath: canRenderGizmo
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5665729561873690764, guid: a68e771f15d3377469be2d9898e00001, type: 3}
       propertyPath: f_maxRange
       value: 27
@@ -5925,6 +5929,10 @@ PrefabInstance:
     - target: {fileID: 3812132393004376837, guid: a68e771f15d3377469be2d9898e00001, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4443259202892341145, guid: a68e771f15d3377469be2d9898e00001, type: 3}
+      propertyPath: canRenderGizmo
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6778744589707518115, guid: a68e771f15d3377469be2d9898e00001, type: 3}
       propertyPath: m_Name
