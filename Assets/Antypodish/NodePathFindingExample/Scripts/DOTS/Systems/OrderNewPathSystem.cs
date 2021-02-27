@@ -92,7 +92,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
             
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannarPrefab" ) ;
 
-                na_pathPlannersExample = group_pathPlanners.ToEntityArray ( Allocator.TempJob ) ;
+                na_pathPlannersExample = group_pathPlanners.ToEntityArray ( Allocator.Persistent ) ;
             }
 
         }
