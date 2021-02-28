@@ -9,7 +9,7 @@ https://forum.unity.com/threads/dots-node-based-path-finding-eager-dijkstra.1064
 
 ## Youtube vid
 
-[![Watch the video](https://www.youtube.com/watch?v=9GBRigAs2lc)](https://www.youtube.com/watch?v=9GBRigAs2lc)
+[![Watch the video]](https://www.youtube.com/watch?v=9GBRigAs2lc)
 
 
 ## Scene
