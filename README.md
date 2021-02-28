@@ -7,6 +7,11 @@ https://forum.unity.com/threads/dots-node-based-path-finding-eager-dijkstra.1064
 (See also main branch)
 
 
+## Youtube vid
+
+[![Watch the video](https://www.youtube.com/watch?v=9GBRigAs2lc)]
+
+
 ## Scene
 
 Scene represents some terrain with elevations and path nodes.
