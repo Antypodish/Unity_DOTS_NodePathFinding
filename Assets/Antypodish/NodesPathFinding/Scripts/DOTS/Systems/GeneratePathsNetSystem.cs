@@ -290,7 +290,7 @@ Debug.DrawLine ( f3_pathNodePosition, f3_endPoint, Color.grey, 2 ) ;
 
                                 float f_closestHitDistance          = math.INFINITY ;
                                 float3 f3_closestNodePositionDebug  = 0 ;
-                                Entity closestEntity                = default ;
+                                Entity closestEntity                = new Entity () { Index = -1, Version = -1 } ; ;
 
                                 // Get closest hit.
                                 for ( int l = 0; l < nl_allHits.Length; l ++ ) 
