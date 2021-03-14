@@ -10,12 +10,12 @@ namespace Antypodish.NodePathFinding.DOTS
     /// </summary>
     public enum CollisionFilters
     {
-        ElevationNodes = 9,
+        PathNodes = 9,
 
-        Floor          = 1,
-        Walls          = 2,
-        Ramps          = 3,
-        // Other       = 4,
-        Raycast        = 5
+        Floor     = 1,
+        Walls     = 2,
+        Ramps     = 3,
+        // Other  = 4,
+        Raycast   = 5
     }
 }

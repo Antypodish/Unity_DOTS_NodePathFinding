@@ -152,7 +152,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
 
             
                 CollisionFilter collisionFilter = default ;
-                collisionFilter.CollidesWith    = 1 << (int) CollisionFilters.ElevationNodes ; // Elevation Nodes.
+                collisionFilter.CollidesWith    = 1 << (int) CollisionFilters.PathNodes ; // Elevation Nodes.
                 // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Floor ; // Floor.
                 // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Walls ; // Walls.
                 // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Ramps ; // Ramps.
