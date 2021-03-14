@@ -4,7 +4,7 @@ Unity DOTS node based path finding, using Eager Dijkstra modified Shortest Path 
 Please see Unity DOTS forum for discussions.
 https://forum.unity.com/threads/dots-node-based-path-finding-eager-dijkstra.1064294/
 
-(See also other branches)
+(See also other branches, with more advanced features and vid.)
 
 
 ## Scene
