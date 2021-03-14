@@ -3,7 +3,7 @@
 namespace Antypodish.DOTS
 {
     
-    public struct IsAliveTag : IComponentData {}
+    public struct IsActiveTag : IComponentData {}
 
     public struct IsInitializedTag : IComponentData {}
     

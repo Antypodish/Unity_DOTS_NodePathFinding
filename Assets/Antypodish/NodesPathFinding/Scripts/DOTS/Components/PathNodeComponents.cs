@@ -16,4 +16,5 @@ namespace Antypodish.NodePathFinding.DOTS
         public float3 f3 ;
         public float f_distance ;
     }
+
 }

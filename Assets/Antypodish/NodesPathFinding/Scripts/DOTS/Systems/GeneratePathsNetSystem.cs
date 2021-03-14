@@ -40,7 +40,7 @@ namespace Antypodish.NodePathFinding.DOTS
             (
                 ComponentType.ReadOnly <PathNodeTag> (),
 
-                ComponentType.Exclude <IsAliveTag> ()
+                ComponentType.Exclude <IsActiveTag> ()
             ) ;
 
             
@@ -69,14 +69,6 @@ namespace Antypodish.NodePathFinding.DOTS
             PhysicsWorld physicsWorld     = buildPhysicsWorld.PhysicsWorld ;
             CollisionWorld collisionWorld = physicsWorld.CollisionWorld ;
             
-            /*
-            CollisionFilter collisionFilter = default ;
-            collisionFilter.CollidesWith = 1 << (int) CollisionFilters.ElevationNodes ; // Elevation Nodes.
-            collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Floor ; // Floor.
-            collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Walls ; // Walls.
-            collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Ramps ; // Ramps.
-            collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Other ; // Other. // Optional
-            */
 
             Entities.WithName ( "SetPathNodesEleveationEntityJob" )
                 .WithAll <PathNodeTag> ()
@@ -92,15 +84,19 @@ namespace Antypodish.NodePathFinding.DOTS
 
             Dependency = new AddPathLinksJob ()
             {
-                physicsWorld              = physicsWorld,
-                collisionWorld            = collisionWorld,
-                a_physicsCollider         = GetComponentDataFromEntity <PhysicsCollider> ( true ),
-                // collisionFilter           = collisionFilter,
-                nmhm_pathNodesByElevation = nmhm_pathNodesByElevation,
-                a_position                = a_position,
-                a_pathNodeLinkRange       = GetComponentDataFromEntity <PathNodeLinkRangeComponent> ( true ),
-                a_pathNodeElevationLink   = GetComponentDataFromEntity <PathNodeElevationLinkComponent> ( true ),
-                pathNodeLinksBuffer       = GetBufferFromEntity <PathNodeLinksBuffer> ( false )
+                physicsWorld                   = physicsWorld,
+                collisionWorld                 = collisionWorld,
+                // a_physicsCollider           = GetComponentDataFromEntity <PhysicsCollider> ( true ),
+                // collisionFilter             = collisionFilter,
+                
+                raycastBelongsToLayerBuffer    = GetBufferFromEntity <RaycastBelongsToLayerBuffer> ( true ),
+                raycastCollidesWithLayerBuffer = GetBufferFromEntity <RaycastCollidesWithLayerBuffer> ( true ),
+
+                nmhm_pathNodesByElevation      = nmhm_pathNodesByElevation,
+                a_position                     = a_position,
+                a_pathNodeLinkRange            = GetComponentDataFromEntity <PathNodeLinkRangeComponent> ( true ),
+                a_pathNodeElevationLink        = GetComponentDataFromEntity <PathNodeElevationLinkComponent> ( true ),
+                pathNodeLinksBuffer            = GetBufferFromEntity <PathNodeLinksBuffer> ( false )
 
             }.Schedule ( Dependency ) ;
 
@@ -131,7 +127,7 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
                 .WithNone <IsInitializedTag> ()
                 .ForEach ( ( Entity nodeEntity, int entityInQueryIndex ) => 
             {
-                ecbp.AddComponent <IsAliveTag> ( entityInQueryIndex, nodeEntity ) ;
+                ecbp.AddComponent <IsActiveTag> ( entityInQueryIndex, nodeEntity ) ;
                 ecbp.AddComponent <IsInitializedTag> ( entityInQueryIndex, nodeEntity ) ;
 
             }).ScheduleParallel () ;
@@ -153,11 +149,18 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
             [ReadOnly]
             public CollisionWorld collisionWorld ;
 
-            [ReadOnly]
-            public ComponentDataFromEntity <PhysicsCollider> a_physicsCollider ;
+
+            // [ReadOnly]
+            // public ComponentDataFromEntity <PhysicsCollider> a_physicsCollider ;
 
             // [ReadOnly]
             // public CollisionFilter collisionFilter ;
+            
+            [ReadOnly]
+            public BufferFromEntity <RaycastBelongsToLayerBuffer> raycastBelongsToLayerBuffer ;
+            
+            [ReadOnly]
+            public BufferFromEntity <RaycastCollidesWithLayerBuffer> raycastCollidesWithLayerBuffer ;
 
             [ReadOnly]
             public NativeMultiHashMap <float, Entity> nmhm_pathNodesByElevation ;
@@ -179,7 +182,8 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
             private NativeArray <CollisionFilter> na_collisionFilters ;
 
             [NativeDisableContainerSafetyRestriction] 
-            NativeArray <Entity> na_pathNodeOnEleveation ;
+            private NativeArray <Entity> na_pathNodeOnEleveation ;
+
             public void Execute ()
             {
                 
@@ -208,11 +212,15 @@ Debug.DrawLine ( position.Value, f3_pathElevationLinkPosition, Color.green, 5 ) 
                     {
                         na_pathNodeOnEleveation [i_pathNodeCount] = pathNodeEntity ;
 
+                        DynamicBuffer <RaycastBelongsToLayerBuffer> a_belongsToLayer       = raycastBelongsToLayerBuffer [pathNodeEntity] ;
+                        DynamicBuffer <RaycastCollidesWithLayerBuffer> a_collidesWithLayer = raycastCollidesWithLayerBuffer [pathNodeEntity] ;
+                        _GetCollisionFilter ( ref a_belongsToLayer, ref a_collidesWithLayer, ref na_collisionFilters, i_elevationIndex ) ;
+
 // Useful resources about physics collider.
 // https://docs.unity3d.com/Packages/com.unity.physics@0.5/manual/core_components.html#modifying-physicscollider
 // https://docs.unity3d.com/Packages/com.unity.physics@0.0/manual/collision_queries.html
-                        PhysicsCollider physicsCollider           = a_physicsCollider [pathNodeEntity] ;
-                        na_collisionFilters [i_elevationIndex]    = physicsCollider.Value.Value.Filter ;
+                        // PhysicsCollider physicsCollider           = a_physicsCollider [pathNodeEntity] ;
+                        // na_collisionFilters [i_elevationIndex]    = physicsCollider.Value.Value.Filter ;
                         
                     /*
 RigidBody rb                    = physicsWorld.Bodies [hit.RigidBodyIndex] ;
@@ -233,8 +241,12 @@ Entity e                        = rb.Entity ;
                     {
                         na_pathNodeOnEleveation [i_pathNodeCount] = pathNodeEntity ;
 
-                        PhysicsCollider physicsCollider           = a_physicsCollider [pathNodeEntity] ;
-                        na_collisionFilters [i_elevationIndex]    = physicsCollider.Value.Value.Filter ;
+                        DynamicBuffer <RaycastBelongsToLayerBuffer> a_belongsToLayer       = raycastBelongsToLayerBuffer [pathNodeEntity] ;
+                        DynamicBuffer <RaycastCollidesWithLayerBuffer> a_collidesWithLayer = raycastCollidesWithLayerBuffer [pathNodeEntity] ;
+                        _GetCollisionFilter ( ref a_belongsToLayer, ref a_collidesWithLayer, ref na_collisionFilters, i_elevationIndex ) ;
+
+                        // PhysicsCollider physicsCollider           = a_physicsCollider [pathNodeEntity] ;
+                        // na_collisionFilters [i_elevationIndex]    = physicsCollider.Value.Value.Filter ;
 
 // Debug.Log ( i_uniqueKeys + "; Next: " + pathNodeEntity ) ;
                         i_pathNodeCount ++ ;
@@ -273,7 +285,11 @@ Entity e                        = rb.Entity ;
                             } ;
                     
                             CollisionFilter collisionFilter  = na_collisionFilters [i_elevationIndex] ;
-                            raycastInput.Filter.CollidesWith = collisionFilter.BelongsTo ;
+
+                            raycastInput.Filter.BelongsTo    = collisionFilter.BelongsTo ;
+                            raycastInput.Filter.CollidesWith = collisionFilter.CollidesWith ;
+
+                            // raycastInput.Filter.CollidesWith = collisionFilter.BelongsTo ;
                             // raycastInput.Filter.BelongsTo    = collisionFilter.BelongsTo ;
 
                             // var collector = new IgnoreTransparentClosestHitCollector ( collisionWorld ) ;
@@ -290,7 +306,8 @@ Debug.DrawLine ( f3_pathNodePosition, f3_endPoint, Color.grey, 2 ) ;
 
                                 float f_closestHitDistance          = math.INFINITY ;
                                 float3 f3_closestNodePositionDebug  = 0 ;
-                                Entity closestEntity                = new Entity () { Index = -1, Version = -1 } ; ;
+                                Entity closestEntity                = new Entity () { Index = -1, Version = -1 } ;
+                                // Entity closestEntity                = new Entity () { Index = -1, Version = -1 } ; ;
 
                                 // Get closest hit.
                                 for ( int l = 0; l < nl_allHits.Length; l ++ ) 
@@ -321,7 +338,7 @@ Debug.DrawLine ( f3_pathNodePosition, f3_endPoint, Color.grey, 2 ) ;
                                 // Closest hit is found.
                                 if ( closestEntity.Index == targetPathNode.Index )
                                 {
-                                    
+
                                     float3 f3_hitNodePosition = a_position [closestEntity].Value ;
 
 Debug.DrawLine ( f3_pathNodePosition, f3_hitNodePosition, Color.green, 5 ) ; // Length of ray, until hit collider.
@@ -346,6 +363,28 @@ Debug.DrawLine ( f3_pathNodePosition, f3_closestNodePositionDebug, Color.red, 3 
             }
 
         }
+        
+
+        static public void _GetCollisionFilter ( ref DynamicBuffer <RaycastBelongsToLayerBuffer> a_belongsToLayer, ref DynamicBuffer <RaycastCollidesWithLayerBuffer> a_collidesWithLayer, ref NativeArray <CollisionFilter> na_collisionFilters, int i_elevationIndex )
+        {
+            uint ui_belongsToMask = 0 ;
+            for ( int i = 0; i < a_belongsToLayer.Length; i ++ )
+            {
+                ui_belongsToMask |= (uint) ( 1 << a_belongsToLayer [i].i_layerID ) ;
+            }
+                
+            uint ui_collidesWithMask = 0 ;
+            for ( int i = 0; i < a_collidesWithLayer.Length; i ++ )
+            {
+                ui_collidesWithMask |= (uint) ( 1 << a_collidesWithLayer [i].i_layerID ) ;
+            }
+            CollisionFilter collisionFilter = default ;
+            collisionFilter.BelongsTo    = ui_belongsToMask ;
+            collisionFilter.CollidesWith = ui_collidesWithMask ;
+            na_collisionFilters [i_elevationIndex] = collisionFilter ;
+// Debug.Log ( collisionFilter.BelongsTo + "; " + collisionFilter.CollidesWith ) ;
+        }
+
 
     }
 

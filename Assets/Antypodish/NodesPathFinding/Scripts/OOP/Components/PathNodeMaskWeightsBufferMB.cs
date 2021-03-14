@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-
-using Antypodish.NodePathFinding.DOTS ;
 
 namespace Antypodish.NodesPathFinding.Scripts.OOP
 {
@@ -30,19 +27,6 @@ namespace Antypodish.NodesPathFinding.Scripts.OOP
             "Buffer size 3 and mask set to 3, will match and first and second (not third) buffer indexes and its weights will be evaluated." +
             "Buffer size 4 and mask set to 5, will match and first and forth buffer indexes and its weights will be evaluated." +
             "Etc." ;
-        // PathNodeLinkRangeComponent DOTS_pathNodeLinkRangeComponent ;
-
-
-        // Use this for initialization
-        void Start ( )
-        {
-        }
-
-        // Update is called once per frame
-        void Update ( )
-        {
-
-        }
 
     }
 }

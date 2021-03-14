@@ -56,7 +56,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
 
             group_pathPlanners = EntityManager.CreateEntityQuery 
             (
-                ComponentType.ReadOnly <IsAliveTag> (),
+                ComponentType.ReadOnly <IsActiveTag> (),
                 ComponentType.Exclude <CanFindPathTag> (),
 
                 ComponentType.ReadWrite <PathPlannerComponent> ()
@@ -64,9 +64,10 @@ namespace Antypodish.NodePathFindingExample.DOTS
             
             EntityArchetype entityArchetype = EntityManager.CreateArchetype
             (
-                typeof ( IsAliveTag ),
+                typeof ( IsActiveTag ),
                 typeof ( PathPlannerComponent ),
                 typeof ( PathPlannerWeightsMaskComponent ),
+                typeof ( PathTotalLengthComponent ),
                 typeof ( PathNodesBuffer ),
                 
                 typeof ( Prefab )
@@ -78,17 +79,17 @@ namespace Antypodish.NodePathFindingExample.DOTS
 
                 Entity pathPlannerPrefabEntity = EntityManager.CreateEntity ( entityArchetype ) ;
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannar" ) ;
-                NativeArray <Entity> na_pathPLannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 3, Allocator.Temp ) ;
+                NativeArray <Entity> na_pathPlannerEntities = EntityManager.Instantiate ( pathPlannerPrefabEntity, 3, Allocator.Temp ) ;
 
-                if ( na_pathPLannerEntities.Length > 1 ) 
+                if ( na_pathPlannerEntities.Length > 1 ) 
                 {
                     int i_index = 0 ;
-                    EntityManager.SetComponentData ( na_pathPLannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 0 } ) ;
-                    EntityManager.SetComponentData ( na_pathPLannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 1 } ) ;
-                    EntityManager.SetComponentData ( na_pathPLannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 2 } ) ;
+                    EntityManager.SetComponentData ( na_pathPlannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 0 } ) ;
+                    EntityManager.SetComponentData ( na_pathPlannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 1 } ) ;
+                    EntityManager.SetComponentData ( na_pathPlannerEntities [i_index ++], new PathPlannerWeightsMaskComponent () { i_mask = 2 } ) ;
                 }
 
-                na_pathPLannerEntities.Dispose () ;
+                na_pathPlannerEntities.Dispose () ;
             
                 EntityManager.SetName ( pathPlannerPrefabEntity, "PathPlannarPrefab" ) ;
 
@@ -114,35 +115,6 @@ namespace Antypodish.NodePathFindingExample.DOTS
             
             if ( i_pathPlannerCount == 0 ) return ;
             
-            CollisionWorld collisionWorld        = buildPhysicsWorld.PhysicsWorld.CollisionWorld ;
-
-
-
-            float3 f_pointerPosition             = Input.mousePosition ;
-            UnityEngine.Ray pointerRay           = Camera.main.ScreenPointToRay ( f_pointerPosition ) ;
-
-Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 200, Color.blue ) ;
-
-            
-            CollisionFilter collisionFilter = default ;
-            collisionFilter.CollidesWith    = 1 << (int) CollisionFilters.ElevationNodes ; // Elevation Nodes.
-            // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Floor ; // Floor.
-            // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Walls ; // Walls.
-            // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Ramps ; // Ramps.
-            // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Other ; // Other. // Optional
-
-            var raycastInput = new RaycastInput
-            {
-                Start  = pointerRay.origin,
-                End    = pointerRay.origin + pointerRay.direction * 200,
-                Filter = CollisionFilter.Default
-            } ;
-                    
-            // raycastInput.Filter.CollidesWith = 2 ; // Scores layer.
-            raycastInput.Filter.CollidesWith = collisionFilter.CollidesWith ; // Barriers layer.
-                    
-            var collector = new IgnoreTransparentClosestHitCollector ( collisionWorld ) ;
-
             
             if ( Input.GetMouseButtonUp ( 2 ) ) // Middle click.
             {
@@ -168,12 +140,40 @@ Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 2
             }
 
 
-            if ( collisionWorld.CastRay ( raycastInput, ref collector ) )
+            if ( Input.GetMouseButtonUp ( 0 ) || Input.GetMouseButtonUp ( 1 ) ) // Left, right click.
             {
+                
+                CollisionWorld collisionWorld        = buildPhysicsWorld.PhysicsWorld.CollisionWorld ;
 
-                if ( Input.GetMouseButtonUp ( 0 ) || Input.GetMouseButtonUp ( 1 ) ) // Left, right click.
+                float3 f_pointerPosition             = Input.mousePosition ;
+                UnityEngine.Ray pointerRay           = Camera.main.ScreenPointToRay ( f_pointerPosition ) ;
+
+    Debug.DrawLine ( pointerRay.origin, pointerRay.origin + pointerRay.direction * 200, Color.blue ) ;
+
+            
+                CollisionFilter collisionFilter = default ;
+                collisionFilter.CollidesWith    = 1 << (int) CollisionFilters.ElevationNodes ; // Elevation Nodes.
+                // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Floor ; // Floor.
+                // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Walls ; // Walls.
+                // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Ramps ; // Ramps.
+                // collisionFilter.CollidesWith += 1 << (int) CollisionFilters.Other ; // Other. // Optional
+
+                var raycastInput = new RaycastInput
                 {
-   
+                    Start  = pointerRay.origin,
+                    End    = pointerRay.origin + pointerRay.direction * 200,
+                    Filter = CollisionFilter.Default
+                } ;
+                    
+                // raycastInput.Filter.CollidesWith = 2 ; // Scores layer.
+                raycastInput.Filter.CollidesWith = collisionFilter.CollidesWith ; // Barriers layer.
+                    
+                var collector = new IgnoreTransparentClosestHitCollector ( collisionWorld ) ;
+
+
+                if ( collisionWorld.CastRay ( raycastInput, ref collector ) )
+                {
+
 Debug.Log ( "Hits: " + collector.ClosestHit.Entity + " @ pos: " + collector.ClosestHit.Position ) ;
                     
                     ComponentDataFromEntity <PathPlannerComponent> a_pathPlanners = GetComponentDataFromEntity <PathPlannerComponent> ( false ) ;
@@ -222,7 +222,7 @@ Debug.Log ( "Start entity: " + pathPlanner.entityA + " target entity: " + pathPl
 
                         Entities
                             .WithName ( "OrderPathSearchJob" )
-                            .WithAll <IsAliveTag, PathPlannerComponent> ()
+                            .WithAll <IsActiveTag, PathPlannerComponent> ()
                             .ForEach ( ( Entity entity, int entityInQueryIndex ) => 
                         { 
                             

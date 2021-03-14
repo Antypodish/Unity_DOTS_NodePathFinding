@@ -21,6 +21,9 @@ GameObject:
   - component: {fileID: 9134703250481038401}
   - component: {fileID: 6944771751959454833}
   - component: {fileID: 8484546781544526605}
+  - component: {fileID: 3843201707505590807}
+  - component: {fileID: -2365585839715661041}
+  - component: {fileID: -8213749097585396340}
   m_Layer: 8
   m_Name: PathNode
   m_TagString: Untagged
@@ -275,9 +278,9 @@ MonoBehaviour:
     m_BelongsToCategories:
       m_Override: 0
       m_Value:
-        Category00: 1
-        Category01: 1
-        Category02: 1
+        Category00: 0
+        Category01: 0
+        Category02: 0
         Category03: 0
         Category04: 0
         Category05: 0
@@ -315,12 +318,12 @@ MonoBehaviour:
         Category02: 0
         Category03: 0
         Category04: 0
-        Category05: 0
+        Category05: 1
         Category06: 0
         Category07: 0
         Category08: 0
         Category09: 0
-        Category10: 1
+        Category10: 0
         Category11: 0
         Category12: 0
         Category13: 0
@@ -405,3 +408,54 @@ MonoBehaviour:
     Tag05: 0
     Tag06: 0
     Tag07: 0
+--- !u!114 &3843201707505590807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6778744589707518115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae86c6df56771f94a91923a666b593b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GeneralDescription: Raycast Belongs To and Collides With Layer Buffers are used
+    only for path finding generation, which uses raycast, to check if nodes are on
+    visible path. Creating that way the link. See also CollisionFilter.cs for example
+    details.
+  BelongsToLayerDescription: Buffer layer by defualt has one element, and it matches
+    raycast belongs to layer. The values are used to evaluate mask with 1 << layerID.
+    If multiple layer are used, all are OR-ed.
+  CollidesWithLayerDescription: Buffer layer by defualt has few elements, and it
+    matches static objects' belongs to layers.For example Wall belongs to layerID
+    1 and ramp belongs to layerID 2.The values are used to evaluate mask with 1 <<
+    layerID. If multiple layer are used, all are OR-ed.Used static objects in this
+    example, have also set collide with raycast layer.See static object prefabs in
+    inspector, for details.
+--- !u!114 &-2365585839715661041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6778744589707518115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b764eb4af5a4ec4093f003cbe221deb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Values: 05000000
+--- !u!114 &-8213749097585396340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6778744589707518115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5eaa3362d0fce2c418991156555f1552, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Values: 00000000010000000200000009000000

@@ -14,6 +14,7 @@ namespace Antypodish.NodePathFinding.DOTS
     public struct PathNodesBuffer : IBufferElementData
     { 
         public float3 f3_position ;
+        public float f_distance2PreviousNode ;
     }
     
     /// <summary>
@@ -33,7 +34,11 @@ namespace Antypodish.NodePathFinding.DOTS
         /// </summary>
         public int i_mask ;
     }
-
+    
+    public struct PathTotalLengthComponent : IComponentData
+    {
+        public float f ;
+    }
+    
     public struct CanFindPathTag : IComponentData {}
-
 }

@@ -12,9 +12,10 @@ namespace Antypodish.NodePathFinding.DOTS
     {
         ElevationNodes = 9,
 
-        Floor = 1,
-        Walls = 2,
-        Ramps = 3,
-        Other = 4
+        Floor          = 1,
+        Walls          = 2,
+        Ramps          = 3,
+        // Other       = 4,
+        Raycast        = 5
     }
 }
