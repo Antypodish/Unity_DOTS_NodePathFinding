@@ -16,13 +16,14 @@ using Antypodish.NodePathFinding.DOTS ;
 namespace Antypodish.NodePathFindingExample.DOTS
 {
 
-    [AlwaysUpdateSystem]
-    [UpdateAfter ( typeof ( FixedStepSimulationSystemGroup ))]
-    [UpdateBefore ( typeof ( PathFindingSystem ) )]
+    // [AlwaysUpdateSystem]
+    [UpdateBefore ( typeof ( SimulationSystemGroup ) )]
+    // [UpdateAfter ( typeof ( FixedStepSimulationSystemGroup ))]
+    // [UpdateBefore ( typeof ( PathFindingSystem ) )]
     public class OrderNewPathSystem : SystemBase
     {
         
-        BeginSimulationEntityCommandBufferSystem becb ;
+        EndSimulationEntityCommandBufferSystem eecb ;
 
         BuildPhysicsWorld  buildPhysicsWorld ;
 
@@ -50,7 +51,7 @@ namespace Antypodish.NodePathFindingExample.DOTS
 
         protected override void OnCreate ( )
         {
-            becb = World.GetOrCreateSystem <BeginSimulationEntityCommandBufferSystem> () ;
+            eecb = World.GetOrCreateSystem <EndSimulationEntityCommandBufferSystem> () ;
             
             buildPhysicsWorld = World.GetOrCreateSystem <BuildPhysicsWorld> () ;
 
@@ -119,8 +120,6 @@ namespace Antypodish.NodePathFindingExample.DOTS
             if ( Input.GetMouseButtonUp ( 2 ) ) // Middle click.
             {
                     
-                // NativeArray <Entity> na_pathPlanners = group_pathPlanners.ToEntityArray ( Allocator.TempJob ) ;
-
                 if ( i_pathPlannerIndex >= na_pathPlannersExample.Length - 1 ) 
                 {
                     i_pathPlannerIndex       = -1 ;
@@ -214,7 +213,7 @@ Debug.Log ( "Hits: " + collector.ClosestHit.Entity + " @ pos: " + collector.Clos
                     if ( pathPlanner.entityA.Version > 0 && pathPlanner.entityB.Version > 0 )
                     {
                         
-                        EntityCommandBuffer.ParallelWriter ecbp = becb.CreateCommandBuffer ().AsParallelWriter () ;
+                        EntityCommandBuffer.ParallelWriter ecbp = eecb.CreateCommandBuffer ().AsParallelWriter () ;
 
 Debug.Log ( "Start entity: " + pathPlanner.entityA + " target entity: " + pathPlanner.entityB ) ;
                         
@@ -234,7 +233,7 @@ Debug.Log ( "Start entity: " + pathPlanner.entityA + " target entity: " + pathPl
 
                         }).Schedule () ;
 
-                        becb.AddJobHandleForProducer ( Dependency ) ;
+                        eecb.AddJobHandleForProducer ( Dependency ) ;
                     }
 
                 }
