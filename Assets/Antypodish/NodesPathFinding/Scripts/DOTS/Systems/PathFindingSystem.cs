@@ -542,6 +542,12 @@ Debug.DrawLine ( f3_currentNodePos, f3_nextNodePos, Color.white, 2 ) ;
 
                     }
 
+                    if ( i_lastVisitedPathNodesTargetIndex >= na_lastVisitedPathNodesTarget.Length ) 
+                    {
+                        i = i_lastVisitedPathNodesSourceIndex ; // Quit next loop too.
+                        break ; // There is no more last nodes to search.
+                    }
+
                 } // for
                 
                 lastBestPath.isBetterPathFound = isThisTargetNodeWithShortestPath && !canLookForAnotherBestPath ;
